@@ -1,0 +1,86 @@
+﻿<Window x:Class="YMTEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YMTEditor"
+        mc:Ignorable="d"
+        Title="YMTEditor by grzybeek" Height="400" Width="700">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" />
+                <MenuItem Header="_Open (XML)" Click="OpenXML_Click"/>
+                <MenuItem Header="_Save" />
+                <Separator />
+                <MenuItem Header="_Exit" />
+            </MenuItem>
+        </Menu>
+        
+        <ScrollViewer>
+            <Grid Height="auto">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ItemsControl Name="ComponentsItemsControl" Grid.RowSpan="12">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <Expander Grid.Row="0">
+                                    <Expander.Header >
+                                        <TextBlock Background="LightGray" FontSize="20" Foreground="Black" Text="{Binding compHeader}" HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}" />
+                                    </Expander.Header>
+                                    <GroupBox>
+                                        <GroupBox.Header>
+                                            <StackPanel>
+                                                <TextBlock FontWeight="Bold" Text="{Binding compHeader, StringFormat=' {0} Component'}"></TextBlock>
+                                            </StackPanel>
+                                        </GroupBox.Header>
+                                        <ItemsControl ItemsSource="{Binding compListItemsControl}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,5">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="100" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <GroupBox>
+                                                            <GroupBox.Header>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding drawableIndex, StringFormat=' {0:0#,#}'}"></TextBlock>
+                                                                </StackPanel>
+                                                            </GroupBox.Header>
+                                                            <GroupBox.Content>
+                                                                <Grid>
+                                                                    <TextBlock Text="{Binding drawableTextureCount, StringFormat='Textures: {0}'}"></TextBlock>
+                                                                    <!--<Button HorizontalContentAlignment="Right" Content="Add new texture"/>-->
+                                                                </Grid>
+                                                            </GroupBox.Content>
+                                                        </GroupBox>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </GroupBox>
+                                </Expander>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </ScrollViewer>
+        
+    </DockPanel>
+
+</Window>
