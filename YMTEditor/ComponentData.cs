@@ -12,7 +12,7 @@ namespace YMTEditor
         public string compType;
         public int compId;
         public int compIndex;
-        public ObservableCollection<ComponentDrawable> compListItemsControl { get; set; }
+        public ObservableCollection<ComponentDrawable> compList { get; set; }
 
         public string compHeader { get; set; }
 
@@ -21,7 +21,7 @@ namespace YMTEditor
             compType = type;
             compId = id;
             compIndex = index;
-            compListItemsControl = drawables;
+            compList = drawables;
 
         }
 

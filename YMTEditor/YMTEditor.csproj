@@ -67,6 +67,7 @@
     </Compile>
     <Compile Include="ComponentDrawable.cs" />
     <Compile Include="ComponentData.cs" />
+    <Compile Include="ComponentTexture.cs" />
     <Compile Include="ComponentTypes.cs" />
     <Compile Include="XMLHandler.cs" />
     <Compile Include="MainWindow.xaml.cs">

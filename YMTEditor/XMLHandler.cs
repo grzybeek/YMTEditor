@@ -51,8 +51,16 @@ namespace YMTEditor
                 foreach (var drawable_node in node.Descendants("aDrawblData3").Elements("Item"))
                 {
                     int texturesCount = drawable_node.Elements("aTexData").Elements("Item").Count();
-
-                    _curComp.compListItemsControl.Add(new ComponentDrawable(_curCompDrawableIndex, texturesCount));
+                    int textureIndex = 0;
+                    ComponentDrawable _curDrawable = new ComponentDrawable(_curCompDrawableIndex, texturesCount, new ObservableCollection<ComponentTexture>());
+                    _curComp.compList.Add(_curDrawable);
+                    foreach (var texture_node in drawable_node.Descendants("aTexData").Elements("Item"))
+                    {
+                        string texId = texture_node.Element("texId").FirstAttribute.Value;
+                        string texLetter = Number2String(textureIndex, false);
+                        _curDrawable.drawableTextures.Add(new ComponentTexture(texLetter, texId));
+                        textureIndex++;
+                    }
                     _curCompDrawableIndex++;
                 }
 
@@ -65,6 +73,11 @@ namespace YMTEditor
 
         }
 
- 
+
+        private static String Number2String(int number, bool isCaps)
+        {
+            Char c = (Char)((isCaps ? 65 : 97) + (number));
+            return c.ToString();
+        }
     }
 }

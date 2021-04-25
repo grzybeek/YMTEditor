@@ -47,31 +47,84 @@
                                                 <TextBlock FontWeight="Bold" Text="{Binding compHeader, StringFormat=' {0} Component'}"></TextBlock>
                                             </StackPanel>
                                         </GroupBox.Header>
-                                        <ItemsControl ItemsSource="{Binding compListItemsControl}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid Margin="0,0,0,5">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="100" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <GroupBox>
-                                                            <GroupBox.Header>
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Text="{Binding drawableIndex, StringFormat=' {0:0#,#}'}"></TextBlock>
-                                                                </StackPanel>
-                                                            </GroupBox.Header>
-                                                            <GroupBox.Content>
-                                                                <Grid>
-                                                                    <TextBlock Text="{Binding drawableTextureCount, StringFormat='Textures: {0}'}"></TextBlock>
-                                                                    <!--<Button HorizontalContentAlignment="Right" Content="Add new texture"/>-->
-                                                                </Grid>
-                                                            </GroupBox.Content>
-                                                        </GroupBox>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                        <GroupBox.Content>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <ItemsControl Grid.Row="0" ItemsSource="{Binding compList}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,0,0,5">
+                                                                <GroupBox>
+                                                                    <GroupBox.Header>
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBlock FontWeight="Bold" Text="{Binding drawableIndex, StringFormat=' {0:0#,#}'}"></TextBlock>
+                                                                        </StackPanel>
+                                                                    </GroupBox.Header>
+                                                                    <GroupBox.Content>
+                                                                        <Grid>
+                                                                            <Grid.RowDefinitions>
+                                                                                <RowDefinition Height="*" />
+                                                                                <RowDefinition Height="*" />
+                                                                            </Grid.RowDefinitions>
+                                                                            <TextBlock Grid.Row="0" Text="{Binding drawableTextureCount, StringFormat='Textures: {0}'}"></TextBlock>
+
+                                                                            <Expander Grid.Row="1" Header="View textures">
+                                                                                <Grid>
+                                                                                    <Grid.RowDefinitions>
+                                                                                        <RowDefinition Height="*" />
+                                                                                        <RowDefinition Height="*" />
+                                                                                    </Grid.RowDefinitions>
+                                                                                    <ItemsControl Grid.Row="0" ItemsSource="{Binding drawableTextures}">
+                                                                                        <ItemsControl.ItemTemplate>
+                                                                                            <DataTemplate>
+                                                                                                <Grid>
+                                                                                                    <GroupBox Grid.Row="0">
+                                                                                                        <GroupBox.Header>
+                                                                                                            <StackPanel>
+                                                                                                                <TextBlock Text="{Binding textureIndex, StringFormat='Texture letter: {0}'}"></TextBlock>
+                                                                                                            </StackPanel>
+                                                                                                        </GroupBox.Header>
+                                                                                                        <GroupBox.Content>
+                                                                                                            <StackPanel>
+                                                                                                                <TextBlock Text="{Binding textureTexId, StringFormat='TexId: {0}'}"></TextBlock>
+                                                                                                            </StackPanel>
+                                                                                                        </GroupBox.Content>
+                                                                                                    </GroupBox>
+                                                                                                    
+                                                                                                </Grid>
+                                                                                            </DataTemplate>
+                                                                                            
+                                                                                        </ItemsControl.ItemTemplate>
+                                                                                        
+                                                                                    </ItemsControl>
+                                                                                    <Grid Grid.Row="1" Margin="0, 15, 0, 0">
+                                                                                        <Button HorizontalAlignment="Left" Width="auto" Height="auto">
+                                                                                            <Button.Content>
+                                                                                                <StackPanel>
+                                                                                                    <TextBlock Text="{Binding drawableIndex, StringFormat=' Add new texture variation to: {0:0#,#}'}"></TextBlock>
+                                                                                                </StackPanel>
+                                                                                                
+                                                                                            </Button.Content>
+                                                                                        </Button>
+                                                                                    </Grid>
+                                                                                </Grid>
+                                                                                
+                                                                            </Expander>
+                                                                        </Grid>
+                                                                    </GroupBox.Content>
+                                                                </GroupBox>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <Grid Grid.Row="1" Margin="0, 15, 0, 0">
+                                                    <Button HorizontalAlignment="Left" Width="auto" Height="auto"  Content="Add new drawable" DataContext="{Binding compHeader}"  Click="Button_Click"/>
+                                                </Grid>
+                                            </Grid>
+                                        </GroupBox.Content>
                                     </GroupBox>
                                 </Expander>
                             </StackPanel>

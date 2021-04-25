@@ -50,5 +50,10 @@ namespace YMTEditor
             }
         }
 
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            string compButton = (string) (sender as Button).DataContext;
+            Console.WriteLine(compButton);
+        }
     }
 }
