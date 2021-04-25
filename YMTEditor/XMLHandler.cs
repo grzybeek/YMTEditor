@@ -12,7 +12,6 @@ namespace YMTEditor
     class XMLHandler
     {
 
-
         public static void LoadXML(string filePath)
         {
             XDocument xmlFile = XDocument.Load(filePath);
@@ -28,35 +27,30 @@ namespace YMTEditor
                     {
                         string _name = Enum.GetName(typeof(ComponentTypes.ComponentNumbers), compId);
                         ComponentData componentName = new ComponentData(_name, compId, compIndex, new ObservableCollection<ComponentDrawable>()) { compHeader = _name.ToUpper()};
-                        Console.WriteLine("adding: " + componentName.ToString());
                         MainWindow.Components.Add(componentName);
-                        //Console.WriteLine(MainWindow.Components.ElementAt(compIndex).compList.Add();
                         compIndex++;
                     }
                     compId++;
                 }
             }
-            Console.WriteLine("<aComponentData3> start");
-            int compItemIndex = 0;
+
+            int compItemIndex = 0; //order of our components in ymt
             foreach (var node in xmlFile.Descendants("aComponentData3").Elements("Item"))
             {
-                Console.WriteLine("<Item> start");
-                ComponentData _curComp = MainWindow.Components.ElementAt(compItemIndex);
-                int _curCompDrawablesCount = 0;
-                int _curCompAvailTex = 0;
-                int _curCompDrawableIndex = 0;
+                ComponentData _curComp = MainWindow.Components.ElementAt(compItemIndex); //current component (jbib/lowr/teef etc)
+                int _curCompDrawablesCount = 0; //count how many component has variations (000, 001, 002, etc)
+                int _curCompAvailTex = 0; // not used by game probably, total amount of textures component has (numAvailTex)
+                int _curCompDrawableIndex = 0; //current drawable index in component (000, 001, 002, etc)
 
                 foreach (var drawable_nodes in node.Descendants("aDrawblData3"))
                 {
                     _curCompDrawablesCount = drawable_nodes.Elements("Item").Count();
                     _curCompAvailTex = drawable_nodes.Elements("Item").Elements("aTexData").Elements("Item").Count();
                 }
-                Console.WriteLine(_curComp.compType + " ma: " + _curCompDrawablesCount + "wariantow z łącznie: " + _curCompAvailTex + " teksturami");
 
                 foreach (var drawable_node in node.Descendants("aDrawblData3").Elements("Item"))
                 {
                     int texturesCount = drawable_node.Elements("aTexData").Elements("Item").Count();
-                    Console.WriteLine("drawable numer: " + _curCompDrawableIndex + "ma tekstur: " + texturesCount);
 
                     _curComp.compListItemsControl.Add(new ComponentDrawable(_curCompDrawableIndex, texturesCount));
                     _curCompDrawableIndex++;
@@ -64,11 +58,6 @@ namespace YMTEditor
 
                 compItemIndex++;
             }
-
-            ComponentData _cur = MainWindow.Components.ElementAt(1);
-            Console.WriteLine("total:");
-            Console.WriteLine(_cur.compListItemsControl.ElementAt(1).ToString());
-
         }
 
         public static void SaveXML(string filePath)
@@ -76,6 +65,6 @@ namespace YMTEditor
 
         }
 
-
+ 
     }
 }

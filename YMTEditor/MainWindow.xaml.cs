@@ -32,16 +32,6 @@ namespace YMTEditor
 
             InitializeComponent();
             Components = new ObservableCollection<ComponentData>();
-            //Drawables = new ObservableCollection<ComponentDrawable>();
-            /*List<HeadComponent> items = new List<HeadComponent>();
-            items.Add(new HeadComponent() {index = 0, texturesAmount = 5 });
-            items.Add(new HeadComponent() {index = 1, texturesAmount = 15 });
-            items.Add(new HeadComponent() { index = 9, texturesAmount = 15 });
-            items.Add(new HeadComponent() { index = 15, texturesAmount = 15 });
-
-            HeadItemsControl.ItemsSource = items;*/
-            //Components.Add("dupa");
-            //Components.Add(Drawables);
             ComponentsItemsControl.ItemsSource = Components;
         }
 
@@ -57,12 +47,6 @@ namespace YMTEditor
             {
                 string filename = xmlFile.FileName;
                 XMLHandler.LoadXML(filename);
-                foreach (var item in Components)
-                {
-                    Console.WriteLine("dsadsa");
-                    Console.WriteLine(item);
-                }
-
             }
         }
 
