@@ -50,6 +50,21 @@ namespace YMTEditor
             }
         }
 
+        private void SaveXML_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog xmlFile = new OpenFileDialog
+            {
+                DefaultExt = ".ymt.xml",
+                Filter = "Codewalker YMT XML (*.ymt.xml)|*.ymt.xml"
+            };
+            bool? result = xmlFile.ShowDialog();
+            if (result == true)
+            {
+                string filename = xmlFile.FileName;
+                XMLHandler.SaveXML(filename);
+            }
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             string compButton = (string) (sender as Button).DataContext;
