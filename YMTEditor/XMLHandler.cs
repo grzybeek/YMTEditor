@@ -18,7 +18,6 @@ namespace YMTEditor
         private static bool bHasDrawblVariations = false;
         private static bool bHasLowLODs = false;
         private static bool bIsSuperLOD = false;
-        private static int[] availComp = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
         private static string dlcName = "TODO";
 
         public static void LoadXML(string filePath)
@@ -31,7 +30,7 @@ namespace YMTEditor
             bHasDrawblVariations = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bHasDrawblVariations").First().FirstAttribute.Value);
             bHasLowLODs = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bHasLowLODs").First().FirstAttribute.Value);
             bIsSuperLOD = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bIsSuperLOD").First().FirstAttribute.Value);
-            dlcName = xmlFile.Elements("CPedVariationInfo").Elements("dlcName").First().FirstAttribute.Value;
+            dlcName = xmlFile.Elements("CPedVariationInfo").Elements("dlcName").First().Value.ToString();
 
             Console.WriteLine(CPedVariationInfo);
 
@@ -71,8 +70,12 @@ namespace YMTEditor
                 foreach (var drawable_node in node.Descendants("aDrawblData3").Elements("Item"))
                 {
                     int texturesCount = drawable_node.Elements("aTexData").Elements("Item").Count();
+                    int drawablePropMask = Convert.ToInt16(drawable_node.Elements("propMask").First().FirstAttribute.Value);
+                    int drawableNumAlternatives = Convert.ToInt16(drawable_node.Elements("numAlternatives").First().FirstAttribute.Value);
+                    bool drawableCloth = Convert.ToBoolean(drawable_node.Elements("clothData").Elements("ownsCloth").First().FirstAttribute.Value.ToString());
+
                     int textureIndex = 0;
-                    ComponentDrawable _curDrawable = new ComponentDrawable(_curCompDrawableIndex, texturesCount, new ObservableCollection<ComponentTexture>());
+                    ComponentDrawable _curDrawable = new ComponentDrawable(_curCompDrawableIndex, texturesCount, drawablePropMask, drawableNumAlternatives, drawableCloth, new ObservableCollection<ComponentTexture>());
                     _curComp.compList.Add(_curDrawable);
                     foreach (var texture_node in drawable_node.Descendants("aTexData").Elements("Item"))
                     {
@@ -111,21 +114,25 @@ namespace YMTEditor
                 for (int j = 0; j < MainWindow.Components.ElementAt(i).compList.Count(); j++)
                 {
                     XElement drawblDataIndex = new XElement("Item");
-                    drawblDataIndex.Add(new XElement("propMask", new XAttribute("value", 1))); //TODO: replace propMask with value from menu window later
-                    drawblDataIndex.Add(new XElement("numAlternatives", new XAttribute("value", 0))); //TODO: add functionality to add alternatives (people usually don't use it but r* .ymt's does)
+                    int _propMask = MainWindow.Components.ElementAt(i).compList.ElementAt(j).drawablePropMask;
+                    int _numAlternatives = MainWindow.Components.ElementAt(i).compList.ElementAt(j).drawableAlternatives;
+                    drawblDataIndex.Add(new XElement("propMask", new XAttribute("value", _propMask)));
+                    drawblDataIndex.Add(new XElement("numAlternatives", new XAttribute("value", _numAlternatives)));
                     XElement TexDataIndex = new XElement("aTexData", new XAttribute("itemType", "CPVTextureData"));
                     drawblDataIndex.Add(TexDataIndex);
 
                     for (int k = 0; k < MainWindow.Components.ElementAt(i).compList.ElementAt(j).drawableTextures.Count(); k++)
                     {
                         XElement TexDataItem = new XElement("Item");
-                        TexDataItem.Add(new XElement("texId", new XAttribute("value", 0))); //TODO: Add user ability to set texId manually - or generate it automatically depending on propMask
+                        int _texId = _propMask == 17 || _propMask == 19 || _propMask == 21 ? 1 : 0; // if propMask 17/19/21 -> texId = 1, otherwise texId = 0 --- there might be other values as well but those are most used
+                        TexDataItem.Add(new XElement("texId", new XAttribute("value", _texId))); //I guess it doesn't need functionality to manually edit it (?)
                         TexDataItem.Add(new XElement("distribution", new XAttribute("value", 255)));
                         TexDataIndex.Add(TexDataItem);
                     }
 
                     XElement clothDataItem = new XElement("clothData");
-                    clothDataItem.Add(new XElement("ownsCloth", new XAttribute("value", false))); //TODO: Add user ability to set value(?) mostly people don't do any models with .yld file
+                    bool _clothData = MainWindow.Components.ElementAt(i).compList.ElementAt(j).drawableHasCloth;
+                    clothDataItem.Add(new XElement("ownsCloth", new XAttribute("value", _clothData)));
                     drawblDataIndex.Add(clothDataItem);
                     drawblData.Add(drawblDataIndex);
                 }

@@ -67,8 +67,33 @@ namespace YMTEditor
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            string compButton = (string) (sender as Button).DataContext;
-            Console.WriteLine(compButton);
+            string btn = Convert.ToString((sender as Button).DataContext);
+
+            Console.WriteLine("DataContext: " + (sender as Button).DataContext);
+            Console.WriteLine("Content: " + (sender as Button).Content);
+            if (int.TryParse(btn, out int val))
+            {
+                //DataContext is number(int) so it was new texture clicked
+                Console.WriteLine(btn);
+            }
+            else
+            {
+                //DataContext is string so it was new variation clicked
+                Console.WriteLine(btn);
+            }
+            Console.WriteLine(btn);
+        }
+
+        private string GetParents(Object element, int parentLevel)
+        {
+            string returnValue = String.Format("[{0}] {1}", parentLevel, element.GetType());
+            if (element is FrameworkElement)
+            {
+                if (((FrameworkElement)element).Parent != null)
+                    returnValue += String.Format("{0}{1}",
+                        Environment.NewLine, GetParents(((FrameworkElement)element).Parent, parentLevel + 1));
+            }
+            return returnValue;
         }
     }
 }
