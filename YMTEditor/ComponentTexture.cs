@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace YMTEditor
 {
     public class ComponentTexture
@@ -11,6 +10,11 @@ namespace YMTEditor
         {
             textureIndex = index;
             textureTexId = texId;
+        }
+
+        public ComponentTexture(string index)
+        {
+            textureIndex = index;
         }
 
 

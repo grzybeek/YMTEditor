@@ -1,12 +1,7 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Xml;
+using System.Windows;
 using System.Xml.Linq;
 
 namespace YMTEditor
@@ -190,9 +185,10 @@ namespace YMTEditor
         {
             XElement xmlFile = XML_Schema(filePath);
             xmlFile.Save(filePath);
+            MessageBox.Show("Saved to: " + filePath, "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private static String Number2String(int number, bool isCaps)
+        public static String Number2String(int number, bool isCaps)
         {
             Char c = (Char)((isCaps ? 65 : 97) + (number));
             return c.ToString();

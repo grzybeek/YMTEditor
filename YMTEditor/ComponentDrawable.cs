@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace YMTEditor
 {
@@ -14,6 +12,7 @@ namespace YMTEditor
         public int drawablePropMask { get; set; }
         public int drawableAlternatives { get; set; }
         public bool drawableHasCloth { get; set; }
+
         public ObservableCollection<ComponentTexture> drawableTextures { get; set; }
 
         public ComponentDrawable(int index, int txtCount, int propMask, int numAlternatives, bool hasCloth, ObservableCollection<ComponentTexture> textureList)
@@ -30,5 +29,6 @@ namespace YMTEditor
         {
             return drawableIndex + " " + drawableTextureCount;
         }
+
     }
 }
