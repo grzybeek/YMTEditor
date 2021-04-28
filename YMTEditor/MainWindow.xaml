@@ -6,7 +6,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:YMTEditor"
         mc:Ignorable="d"
-        Title="YMTEditor by grzybeek" Height="600" Width="900" MinWidth="650" MinHeight="250">
+        Title="YMTEditor by grzybeek" Height="600" Width="900" MinWidth="750" MinHeight="250" Icon="ymteditor.ico">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
@@ -16,7 +16,44 @@
                 <Separator />
                 <MenuItem Header="_Exit" IsEnabled="False" />
             </MenuItem>
+            <MenuItem Name="ComponentsMenu" Header="_Components" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Open XML file to edit components" >
+                <MenuItem Name="head" Header="HEAD" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="berd" Header="BERD" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="hair" Header="HAIR" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="uppr" Header="UPPR" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="lowr" Header="LOWR" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="hand" Header="HAND" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="feet" Header="FEET" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="teef" Header="TEEF" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="accs" Header="ACCS" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="task" Header="TASK" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="decl" Header="DECL" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="jbib" Header="JBIB" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+            </MenuItem>
+            <MenuItem Header="_Options">
+                <MenuItem Name="RemovingAskCheck" Click="RemovingAsk_Click" Header="Ask on removing" IsCheckable="True" StaysOpenOnClick="True"></MenuItem>
+            </MenuItem>
         </Menu>
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <TextBlock Name="logBar" Foreground="Red" FontWeight="Bold" Text="" FontSize="12" Height="18" VerticalAlignment="Center" Padding="8,0,0,0"></TextBlock>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="2" HorizontalAlignment="Right" Padding="5,0,10,2">
+                <Hyperlink NavigateUri="https://github.com/grzybeek/YMTEditor" RequestNavigate="Hyperlink_RequestNavigate" >Source code</Hyperlink>
+            </StatusBarItem>
+        </StatusBar>
         
         <ScrollViewer>
             <Grid Height="auto">
@@ -72,25 +109,26 @@
                                                                                 <RowDefinition Height="*" />
                                                                             </Grid.RowDefinitions>
                                                                             <Grid.ColumnDefinitions>
-                                                                                <ColumnDefinition Width="*"/>
+                                                                                <ColumnDefinition Width="2*"/>
                                                                                 <ColumnDefinition Width="*"/>
                                                                                 <ColumnDefinition Width="*"/>
                                                                                 <ColumnDefinition Width="*"/>
                                                                             </Grid.ColumnDefinitions>
                                                                             <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding drawableTextureCount, StringFormat='Textures: {0}'}"></TextBlock>
-                                                                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                                                            <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="40, -35, 0, 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Content="Remove" Height="18" FontSize="10" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" DataContext="{Binding drawableIndex}" Click="Button_Click_Remove"></Button>
+                                                                            <StackPanel Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
                                                                                 <TextBlock ToolTip="Don't edit propMask if you don't know what are you doing!" Text="propMask: "></TextBlock>
-                                                                                <xctk:IntegerUpDown Minimum="1"  MaxHeight="25" Width="45" ToolTip="Don't edit propMask if you don't know what are you doing!" Value="{Binding drawablePropMask}" />
+                                                                                <xctk:IntegerUpDown Minimum="1" Tag="{Binding drawableIndex}" ValueChanged="propMask_Changed" MaxHeight="25" Width="45" ToolTip="Don't edit propMask if you don't know what are you doing!" Value="{Binding drawablePropMask}" />
                                                                             </StackPanel>
-                                                                            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
+                                                                            <StackPanel Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
                                                                                 <TextBlock ToolTip="Don't edit numAlternatives if you don't know what are you doing!" Text="numAlternatives: "></TextBlock>
-                                                                                <xctk:IntegerUpDown Minimum="0" MaxHeight="25" Width="45" ToolTip="Don't edit numAlternatives if you don't know what are you doing!" Value="{Binding drawableAlternatives}" />
+                                                                                <xctk:IntegerUpDown Minimum="0" Tag="{Binding drawableIndex}" ValueChanged="numAlternatives_Changed"  MaxHeight="25" Width="45" ToolTip="Don't edit numAlternatives if you don't know what are you doing!" Value="{Binding drawableAlternatives}" />
                                                                             </StackPanel>
                                                                             <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Horizontal">
                                                                                 <TextBlock ToolTip="Don't edit clothData if you don't know what are you doing!" Text="clothData: "></TextBlock>
                                                                                 <ComboBox SelectedIndex="0" Width="60">
-                                                                                    <ComboBoxItem Content="False" IsSelected="{Binding drawableHasCloth, Mode=OneWayToSource}" />
-                                                                                    <ComboBoxItem Content="True" IsSelected="{Binding drawableHasCloth, Mode=OneWayToSource}"/>
+                                                                                    <ComboBoxItem Content="False" />
+                                                                                    <ComboBoxItem Content="True" />
                                                                                 </ComboBox>
                                                                             </StackPanel>
                                                                             <Expander Grid.Row="1" Grid.Column="0" Margin="0, 0, 0, 5" Header="View textures">
@@ -99,7 +137,15 @@
                                                                                         <RowDefinition Height="*" />
                                                                                         <RowDefinition Height="*" />
                                                                                     </Grid.RowDefinitions>
-                                                                                    <ItemsControl Grid.Row="0" ItemsSource="{Binding drawableTextures}">
+                                                                                    <Grid Grid.Row="0" Margin="0, 5, 0, 5">
+                                                                                        <Grid.ColumnDefinitions>
+                                                                                            <ColumnDefinition Width="*"/>
+                                                                                            <ColumnDefinition Width="*"/>
+                                                                                        </Grid.ColumnDefinitions>
+                                                                                        <Button Grid.Column="0" HorizontalAlignment="Left" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" +1 texture " Click="Button_Click_Add"></Button>
+                                                                                        <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" -1 texture " Click="Button_Click_Remove"></Button>
+                                                                                    </Grid>
+                                                                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding drawableTextures}">
                                                                                         <ItemsControl.ItemTemplate>
                                                                                             <DataTemplate>
                                                                                                 <Grid>
@@ -111,7 +157,7 @@
                                                                                                         </GroupBox.Header>
                                                                                                         <GroupBox.Content>
                                                                                                             <StackPanel>
-                                                                                                                <TextBlock ToolTip="It doesn't change automatically :( If you changed propMask it will be changed after saving!" Text="{Binding textureTexId, StringFormat='texId: {0}'}"></TextBlock>
+                                                                                                                <TextBlock Text="{Binding textureTexId, StringFormat='texId: {0}'}"></TextBlock>
                                                                                                             </StackPanel>
                                                                                                         </GroupBox.Content>
                                                                                                     </GroupBox>
@@ -122,9 +168,7 @@
                                                                                         </ItemsControl.ItemTemplate>
 
                                                                                     </ItemsControl>
-                                                                                    <Grid Grid.Row="1" Margin="0, 15, 0, 0">
-                                                                                        <Button HorizontalAlignment="Center" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Command="{Binding compList, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}, AncestorLevel=2}}" Width="auto" Height="auto" Content=" Add new texture " Click="Button_Click"></Button>
-                                                                                    </Grid>
+
                                                                                 </Grid>
                                                                             </Expander>
                                                                         </Grid>
@@ -135,7 +179,7 @@
                                                     </ItemsControl.ItemTemplate>
                                                 </ItemsControl>
                                                 <Grid Grid.Row="1" Margin="0, 15, 0, 0">
-                                                    <Button HorizontalAlignment="Left" Width="auto" Height="auto" Content="Add new drawable" DataContext="{Binding compHeader}" Click="Button_Click"/>
+                                                    <Button HorizontalAlignment="Left" Width="auto" Height="auto" Content="Add new drawable" DataContext="{Binding compHeader}" Click="Button_Click_Add"/>
                                                 </Grid>
                                             </Grid>
                                         </GroupBox.Content>
@@ -145,9 +189,10 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                
             </Grid>
+            
         </ScrollViewer>
-        
     </DockPanel>
 
 </Window>

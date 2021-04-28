@@ -5,9 +5,21 @@ using System.ComponentModel;
 
 namespace YMTEditor
 {
-    public class ComponentDrawable
+    public class ComponentDrawable : INotifyPropertyChanged
     {
-        public int drawableIndex { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private int _drawableIndex;
+        public int drawableIndex
+        {
+            get { return _drawableIndex; }
+            set
+            {
+                _drawableIndex = value;
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("drawableIndex"));
+            }
+        }
         public int drawableTextureCount { get; set; }
         public int drawablePropMask { get; set; }
         public int drawableAlternatives { get; set; }

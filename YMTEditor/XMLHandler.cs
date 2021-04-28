@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml.Linq;
 
 namespace YMTEditor
@@ -27,11 +28,9 @@ namespace YMTEditor
             bIsSuperLOD = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bIsSuperLOD").First().FirstAttribute.Value);
             dlcName = xmlFile.Elements("CPedVariationInfo").Elements("dlcName").First().Value.ToString();
 
-            Console.WriteLine(CPedVariationInfo);
 
             foreach (var node in xmlFile.Descendants("availComp"))
             {
-                Console.WriteLine(node.Value);
                 var availComponents = node.Value.Split((char)32); //split on space
                 int compId = 0; //components id's
                 int compIndex = 0; //order of our components in ymt
@@ -42,6 +41,8 @@ namespace YMTEditor
                         string _name = Enum.GetName(typeof(ComponentTypes.ComponentNumbers), compId);
                         ComponentData componentName = new ComponentData(_name, compId, compIndex, new ObservableCollection<ComponentDrawable>()) { compHeader = _name.ToUpper()};
                         MainWindow.Components.Add(componentName);
+                        MenuItem item = (MenuItem)MainWindow._componentsMenu.FindName(_name);
+                        item.IsChecked = true;
                         compIndex++;
                     }
                     compId++;
@@ -131,7 +132,11 @@ namespace YMTEditor
                     drawblDataIndex.Add(clothDataItem);
                     drawblData.Add(drawblDataIndex);
                 }
-                components.Add(compIndex);
+                if (!drawblData.IsEmpty)
+                {
+                    components.Add(compIndex);
+                }
+                
             }
             xml.Add(components);
             // END -> aComponentData3
