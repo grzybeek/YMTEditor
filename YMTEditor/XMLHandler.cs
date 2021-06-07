@@ -28,19 +28,20 @@ namespace YMTEditor
             bIsSuperLOD = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bIsSuperLOD").First().FirstAttribute.Value);
             dlcName = xmlFile.Elements("CPedVariationInfo").Elements("dlcName").First().Value.ToString();
 
-
+            //generate used components
             foreach (var node in xmlFile.Descendants("availComp"))
             {
-                var availComponents = node.Value.Split((char)32); //split on space
+                var availComponents = node.Value.Split(' '); //split on space
                 int compId = 0; //components id's
                 int compIndex = 0; //order of our components in ymt
                 foreach(var comp in availComponents)
                 {
                     if(comp != "255")
                     {
-                        string _name = Enum.GetName(typeof(ComponentTypes.ComponentNumbers), compId);
+                        string _name = Enum.GetName(typeof(YMTTypes.ComponentNumbers), compId);
                         ComponentData componentName = new ComponentData(_name, compId, compIndex, new ObservableCollection<ComponentDrawable>()) { compHeader = _name.ToUpper()};
                         MainWindow.Components.Add(componentName);
+
                         MenuItem item = (MenuItem)MainWindow._componentsMenu.FindName(_name);
                         item.IsChecked = true;
                         compIndex++;
@@ -49,6 +50,28 @@ namespace YMTEditor
                 }
             }
 
+            //generate used props
+            int oldId = -1; //only add props once
+            foreach (var node in xmlFile.Descendants("propInfo"))
+            {
+                foreach (var prop in xmlFile.Descendants("aPropMetaData").Elements("Item"))
+                {
+                    int p_anchorId = Convert.ToInt32(prop.Element("anchorId").FirstAttribute.Value);
+                    
+                    if (oldId != p_anchorId)
+                    {
+                        string _name = Enum.GetName(typeof(YMTTypes.PropNumbers), p_anchorId);
+                        PropData propName = new PropData(_name, p_anchorId, new ObservableCollection<PropDrawable>()) { propHeader = _name.ToUpper() };
+
+                        MainWindow.Props.Add(propName);
+                        MenuItem item = (MenuItem)MainWindow._propsMenu.FindName(_name);
+                        item.IsChecked = true;
+                        oldId = p_anchorId;
+                    }
+                }
+            }
+
+            //read components
             int compItemIndex = 0; //order of our components in ymt
             foreach (var node in xmlFile.Descendants("aComponentData3").Elements("Item"))
             {
@@ -71,7 +94,7 @@ namespace YMTEditor
                     bool drawableCloth = Convert.ToBoolean(drawable_node.Elements("clothData").Elements("ownsCloth").First().FirstAttribute.Value.ToString());
 
                     int textureIndex = 0;
-                    ComponentDrawable _curDrawable = new ComponentDrawable(_curCompDrawableIndex, texturesCount, drawablePropMask, drawableNumAlternatives, drawableCloth, new ObservableCollection<ComponentTexture>());
+                    ComponentDrawable _curDrawable = new ComponentDrawable(_curCompDrawableIndex, texturesCount, drawablePropMask, drawableNumAlternatives, drawableCloth, new ObservableCollection<ComponentTexture>(), new ObservableCollection<ComponentInfo>());
                     _curComp.compList.Add(_curDrawable);
                     foreach (var texture_node in drawable_node.Descendants("aTexData").Elements("Item"))
                     {
@@ -83,6 +106,82 @@ namespace YMTEditor
                     _curCompDrawableIndex++;
                 }
                 compItemIndex++;
+            }
+
+            //load compInfo's properties
+            foreach (var compInfo_node in xmlFile.Descendants("compInfos").Elements("Item"))
+            {
+                string comphash_2FD08CEF = compInfo_node.Element("hash_2FD08CEF").Value.ToString(); //unknown usage
+                string comphash_FC507D28 = compInfo_node.Element("hash_FC507D28").Value.ToString(); //unknown usage
+                string[] comphash_07AE529D = compInfo_node.Element("hash_07AE529D").Value.Split(' '); //probably expressionMods(?) - used for heels for example
+                int compflags = Convert.ToInt32(compInfo_node.Element("flags").FirstAttribute.Value); //unknown usage
+                string compinclusions = compInfo_node.Element("inclusions").Value.ToString(); //unknown usage
+                string compexclusions = compInfo_node.Element("exclusions").Value.ToString(); //unknown usage
+                string comphash_6032815C = compInfo_node.Element("hash_6032815C").Value.ToString(); //unknown usage - always "PV_COMP_HEAD" (?)
+                int comphash_7E103C8B = Convert.ToInt32(compInfo_node.Element("hash_7E103C8B").FirstAttribute.Value); //unknown usage
+
+                int comphash_D12F579D = Convert.ToInt32(compInfo_node.Element("hash_D12F579D").FirstAttribute.Value); //component id (jbib = 11, feet = 6, etc)
+                int comphash_FA1F27BF = Convert.ToInt32(compInfo_node.Element("hash_FA1F27BF").FirstAttribute.Value); //drawable index (000, 001, 002, etc)
+
+                string _name = Enum.GetName(typeof(YMTTypes.ComponentNumbers), comphash_D12F579D);
+                int curCompIndex = ComponentData.GetComponentIndexByID(comphash_D12F579D);
+                if(curCompIndex != -1)
+                {
+                    MainWindow.Components.ElementAt(curCompIndex).compList.ElementAt(comphash_FA1F27BF).drawableInfo.Add(new ComponentInfo(comphash_2FD08CEF, comphash_FC507D28, 
+                        comphash_07AE529D, compflags, compinclusions, compexclusions, comphash_6032815C, comphash_7E103C8B, comphash_D12F579D, comphash_FA1F27BF));
+                }
+            }
+
+            //read props
+            int oldPropId = -1; //reset index on new anchor
+            int _curPropDrawableIndex = 0;
+            foreach (var propinfo_node in xmlFile.Descendants("propInfo"))
+            {
+                foreach (var propMetaData in xmlFile.Descendants("aPropMetaData").Elements("Item"))
+                {
+
+                    string p_audioId = propMetaData.Element("audioId").Value.ToString();
+                    string[] p_expressionMods = propMetaData.Element("expressionMods").Value.Split(' '); //split on space
+
+                    string p_renderFlag = propMetaData.Element("renderFlags").Value.ToString();
+                    int p_propFlag = Convert.ToInt32(propMetaData.Element("propFlags").FirstAttribute.Value);
+                    int p_flag = Convert.ToInt32(propMetaData.Element("flags").FirstAttribute.Value);
+                    int p_anchorId = Convert.ToInt32(propMetaData.Element("anchorId").FirstAttribute.Value);
+                    int p_propId = Convert.ToInt32(propMetaData.Element("propId").FirstAttribute.Value);
+                    int p_hash = Convert.ToInt32(propMetaData.Element("hash_AC887A91").FirstAttribute.Value);
+
+                    string _name = Enum.GetName(typeof(YMTTypes.PropNumbers), p_anchorId);
+
+                    if (oldPropId != p_anchorId)//reset index on new anchor
+                    {
+                        _curPropDrawableIndex = 0;
+                    }
+
+                    PropData _curPropData = MainWindow.Props.ElementAt(p_anchorId);
+                    PropDrawable _curPropDrawable = new PropDrawable(_curPropDrawableIndex, p_audioId, p_expressionMods, new ObservableCollection<PropTexture>(), p_renderFlag, p_propFlag, p_flag, p_anchorId, p_propId, p_hash);
+                    
+                    int texturePropIndex = 0;
+                    foreach (var texData in propMetaData.Descendants("texData").Elements("Item"))
+                    {
+                        string inclusions = texData.Element("inclusions").Value.ToString();
+                        string exclusions = texData.Element("exclusions").Value.ToString();
+                        int texId = Convert.ToInt32(texData.Element("texId").FirstAttribute.Value);
+                        int inclusionId = Convert.ToInt32(texData.Element("inclusionId").FirstAttribute.Value);
+                        int exclusionId = Convert.ToInt32(texData.Element("exclusionId").FirstAttribute.Value);
+                        int distribution = Convert.ToInt32(texData.Element("distribution").FirstAttribute.Value);
+
+                        string texLetter = Number2String(texturePropIndex, false);
+                        _curPropDrawable.propTextureList.Add(new PropTexture(texLetter, inclusions, exclusions, texId, inclusionId, exclusionId, distribution));
+
+                        texturePropIndex++;
+                    }
+
+                    _curPropData.propList.Add(_curPropDrawable);
+
+                    _curPropDrawableIndex++;
+                    oldPropId = p_anchorId;
+                }
+                
             }
         }
 
@@ -152,16 +251,16 @@ namespace YMTEditor
                 foreach (var comp in c.compList)
                 {
                     XElement compInfoItem = new XElement("Item");
-                    compInfoItem.Add(new XElement("hash_2FD08CEF", "none")); //not sure what it does, currently it won't save if there is something set
-                    compInfoItem.Add(new XElement("hash_FC507D28", "none")); //not sure what it does, currently it won't save if there is something set
-                    compInfoItem.Add(new XElement("hash_07AE529D", "0 0 0 0 0"));  //TODO: implement adding "high heels" value in main window for shoes and something else for different components(?)
-                    compInfoItem.Add(new XElement("flags", new XAttribute("value", 0))); //not sure what it does, currently it won't save if there is something set
-                    compInfoItem.Add(new XElement("inclusions", "0")); //not sure what it does, currently it won't save if there is something set
-                    compInfoItem.Add(new XElement("exclusions", "0")); //not sure what it does, currently it won't save if there is something set
-                    compInfoItem.Add(new XElement("hash_6032815C", "PV_COMP_HEAD")); //probably everything has PV_COMP_HEAD (?)
-                    compInfoItem.Add(new XElement("hash_7E103C8B", new XAttribute("value", 0))); //not sure what it does, currently it won't save if there is something set
-                    compInfoItem.Add(new XElement("hash_D12F579D", new XAttribute("value", c.compId)));
-                    compInfoItem.Add(new XElement("hash_FA1F27BF", new XAttribute("value", comp.drawableIndex)));
+                    compInfoItem.Add(new XElement("hash_2FD08CEF", comp.drawableInfo.First().infoHash_2FD08CEF)); //not sure what it does
+                    compInfoItem.Add(new XElement("hash_FC507D28", comp.drawableInfo.First().infoHash_FC507D28)); //not sure what it does
+                    compInfoItem.Add(new XElement("hash_07AE529D", String.Join(" ", comp.drawableInfo.First().infoHash_07AE529D)));  //component expressionMods (?) - gives ability to do heels
+                    compInfoItem.Add(new XElement("flags", new XAttribute("value", comp.drawableInfo.First().infoFlags))); //not sure what it does
+                    compInfoItem.Add(new XElement("inclusions", comp.drawableInfo.First().infoInclusions)); //not sure what it does
+                    compInfoItem.Add(new XElement("exclusions", comp.drawableInfo.First().infoExclusions)); //not sure what it does
+                    compInfoItem.Add(new XElement("hash_6032815C", comp.drawableInfo.First().infoHash_6032815C)); //probably everything has PV_COMP_HEAD (?)
+                    compInfoItem.Add(new XElement("hash_7E103C8B", new XAttribute("value", comp.drawableInfo.First().infoHash_7E103C8B))); //not sure what it does
+                    compInfoItem.Add(new XElement("hash_D12F579D", new XAttribute("value", c.compId))); //component id (jbib = 11, lowr = 4, etc)
+                    compInfoItem.Add(new XElement("hash_FA1F27BF", new XAttribute("value", comp.drawableIndex))); // drawable index (000, 001, 002 etc)
                     compInfo.Add(compInfoItem);
                 }
             }
@@ -169,10 +268,64 @@ namespace YMTEditor
             // END -> compInfos
 
             // START -> propInfo
+            int numAvailPropsCount = 0;
+            for (int i = 0; i < MainWindow.Props.Count(); i++)
+            {
+                numAvailPropsCount += MainWindow.Props.ElementAt(i).propList.Count();
+            }
+
             XElement propInfo = new XElement("propInfo"); //TODO: implement editing props in main window, for now it will remove all props from .YMT (!)
-            propInfo.Add(new XElement("numAvailProps", new XAttribute("value", 0)));
-            propInfo.Add(new XElement("aPropMetaData", new XAttribute("itemType", "CPedPropMetaData")));
-            propInfo.Add(new XElement("aAnchors", new XAttribute("itemType", "CAnchorProps")));
+            propInfo.Add(new XElement("numAvailProps", new XAttribute("value", numAvailPropsCount)));
+
+            XElement aPropMetaData = new XElement("aPropMetaData", new XAttribute("itemType", "CPedPropMetaData"));
+            foreach (var p in MainWindow.Props)
+            {
+                foreach (var prop in p.propList)
+                {
+                    XElement aPropMetaDataItem = new XElement("Item");
+                    aPropMetaDataItem.Add(new XElement("audioId", prop.propAudioId));
+                    aPropMetaDataItem.Add(new XElement("expressionMods", String.Join(" ", prop.propExpressionMods)));
+                    XElement texData = new XElement("texData", new XAttribute("itemType", "CPedPropTexData"));
+                    foreach (var txt in prop.propTextureList)
+                    {
+                        XElement texDataItem = new XElement("Item");
+                        texDataItem.Add(new XElement("inclusions", txt.propInclusions));
+                        texDataItem.Add(new XElement("exclusions", txt.propExclusions));
+                        texDataItem.Add(new XElement("texId", new XAttribute("value", txt.propTexId)));
+                        texDataItem.Add(new XElement("inclusionId", new XAttribute("value", txt.propInclusionId)));
+                        texDataItem.Add(new XElement("exclusionId", new XAttribute("value", txt.propExclusionId)));
+                        texDataItem.Add(new XElement("distribution", new XAttribute("value", txt.propDistribution)));
+                        texData.Add(texDataItem);
+                    }
+                    aPropMetaDataItem.Add(texData);
+                    aPropMetaDataItem.Add(new XElement("renderFlags", prop.propRenderFlags));
+                    aPropMetaDataItem.Add(new XElement("propFlags", new XAttribute("value", prop.propPropFlags)));
+                    aPropMetaDataItem.Add(new XElement("flags", new XAttribute("value", prop.propFlags)));
+                    aPropMetaDataItem.Add(new XElement("anchorId", new XAttribute("value", prop.propAnchorId)));
+                    aPropMetaDataItem.Add(new XElement("propId", new XAttribute("value", prop.propPropId)));
+                    aPropMetaDataItem.Add(new XElement("hash_AC887A91", new XAttribute("value", prop.propHash_AC887A91)));
+                    aPropMetaData.Add(aPropMetaDataItem);
+                }
+            }
+            propInfo.Add(aPropMetaData);
+
+            XElement aAnchors = new XElement("aAnchors", new XAttribute("itemType", "CAnchorProps"));
+            foreach (var p in MainWindow.Props)
+            {
+                XElement aAnchorsItem = new XElement("Item");
+                string[] props = new string[p.propList.Count()];
+                for (int i = 0; i < p.propList.Count(); i++)
+                {
+                    props[i] = p.propList.ElementAt(i).propTextureList.Count().ToString();
+                }
+                aAnchorsItem.Add(new XElement("props", String.Join(" ", props)));
+
+                aAnchorsItem.Add(new XElement("anchor", "ANCHOR_" + p.propHeader.Substring(2)));
+
+                aAnchors.Add(aAnchorsItem);
+            }
+
+            propInfo.Add(aAnchors);
 
             xml.Add(propInfo);
             // END -> propInfo
@@ -220,7 +373,7 @@ namespace YMTEditor
                 _textures = _textures + comp.drawableTextureCount;
             }
 
-            return _textures;
+            return _textures % 256; //numAvailTex is byte -> (gunrunning female, uppr has 720 .ytd's and in .ymt its 208)
         }
     }
 }

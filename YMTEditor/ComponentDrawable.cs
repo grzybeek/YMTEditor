@@ -26,8 +26,9 @@ namespace YMTEditor
         public bool drawableHasCloth { get; set; }
 
         public ObservableCollection<ComponentTexture> drawableTextures { get; set; }
+        public ObservableCollection<ComponentInfo> drawableInfo { get; set; }
 
-        public ComponentDrawable(int index, int txtCount, int propMask, int numAlternatives, bool hasCloth, ObservableCollection<ComponentTexture> textureList)
+        public ComponentDrawable(int index, int txtCount, int propMask, int numAlternatives, bool hasCloth, ObservableCollection<ComponentTexture> textureList, ObservableCollection<ComponentInfo> infoList)
         {
             drawableIndex = index;
             drawableTextureCount = txtCount;
@@ -35,12 +36,12 @@ namespace YMTEditor
             drawableAlternatives = numAlternatives;
             drawableHasCloth = hasCloth;
             drawableTextures = textureList;
+            drawableInfo = infoList;
         }
 
-        public override string ToString()
+        public override string ToString() //used to determine if clicked texture or drawable button (return is displayed as DataContext of button) (MainWindow.xaml.cs -> Button_Click_AddComponent)
         {
             return drawableIndex + " " + drawableTextureCount;
         }
-
     }
 }

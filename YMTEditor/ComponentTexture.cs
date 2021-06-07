@@ -27,11 +27,5 @@ namespace YMTEditor
             textureTexId = texId;
         }
 
-        public ComponentTexture(string index)
-        {
-            textureIndex = index;
-        }
-
-
     }
 }

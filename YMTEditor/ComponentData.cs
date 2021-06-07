@@ -20,9 +20,16 @@ namespace YMTEditor
 
         }
 
-        public override string ToString()
+        public static int GetComponentIndexByID(int number)
         {
-            return compType + " " + compId;
+            foreach (var comp in MainWindow.Components)
+            {
+                if(comp.compId == number)
+                {
+                    return comp.compIndex;
+                }
+            }
+            return -1;
         }
     }
 }

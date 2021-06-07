@@ -86,10 +86,14 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ComponentInfo.cs" />
+    <Compile Include="PropDrawable.cs" />
+    <Compile Include="PropData.cs" />
     <Compile Include="ComponentDrawable.cs" />
     <Compile Include="ComponentData.cs" />
     <Compile Include="ComponentTexture.cs" />
-    <Compile Include="ComponentTypes.cs" />
+    <Compile Include="YMTTypes.cs" />
+    <Compile Include="PropTexture.cs" />
     <Compile Include="XMLHandler.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

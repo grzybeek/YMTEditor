@@ -30,6 +30,22 @@
                 <MenuItem Name="decl" Header="DECL" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
                 <MenuItem Name="jbib" Header="JBIB" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
             </MenuItem>
+            <!-- Props taken from, are they even real?: https://forum.cfx.re/t/how-to-streaming-addon-clothes-and-ped-props-for-mp-freemode-models/458854 -->
+            <MenuItem Name="PropsMenu" Header="_Props" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Open XML file to edit props" >
+                <MenuItem Name="p_head" Header="P__HEAD" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_eyes" Header="P__EYES" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_ears" Header="P__EARS" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_mouth" Header="P__MOUTH" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_lhand" Header="P__LHAND" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_rhand" Header="P__RHAND" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_lwrist" Header="P__LWRIST" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_rwrist" Header="P__RWRIST" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_hip" Header="P__HIP" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_lfoot" Header="P__LFOOT" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_rfoot" Header="P__RFOOT" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
+                <!--<MenuItem Name="UNK_604819740" Header="UNK_604819740" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
+                <MenuItem Name="UNK_2358626934" Header="UNK_2358626934" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>-->
+            </MenuItem>
             <MenuItem Header="_Options">
                 <MenuItem Name="RemovingAskCheck" Click="RemovingAsk_Click" Header="Ask on removing" IsCheckable="True" StaysOpenOnClick="True"></MenuItem>
             </MenuItem>
@@ -56,141 +72,421 @@
         </StatusBar>
         
         <ScrollViewer>
-            <Grid Height="auto">
+            <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <ItemsControl Name="ComponentsItemsControl" Grid.RowSpan="12">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <Expander Grid.Row="0">
-                                    <Expander.Header >
-                                        <TextBlock Background="LightGray" FontSize="20" Foreground="Black" Text="{Binding compHeader}" HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}" />
-                                    </Expander.Header>
-                                    <GroupBox>
-                                        <GroupBox.Header>
-                                            <StackPanel>
-                                                <TextBlock FontWeight="Bold" Text="{Binding compHeader, StringFormat=' {0} Component'}"></TextBlock>
-                                            </StackPanel>
-                                        </GroupBox.Header>
-                                        <GroupBox.Content>
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" />
-                                                    <RowDefinition Height="Auto" />
-                                                </Grid.RowDefinitions>
-                                                <ItemsControl Grid.Row="0" ItemsSource="{Binding compList}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Grid Margin="0,0,0,5">
-                                                                <GroupBox>
-                                                                    <GroupBox.Header>
-                                                                        <StackPanel Orientation="Horizontal">
-                                                                            <TextBlock FontWeight="Bold" Text="{Binding drawableIndex, StringFormat=' {0:0#,#}'}"></TextBlock>
-                                                                        </StackPanel>
-                                                                    </GroupBox.Header>
-                                                                    <GroupBox.Content>
-                                                                        <Grid>
-                                                                            <Grid.RowDefinitions>
-                                                                                <RowDefinition Height="*" />
-                                                                                <RowDefinition Height="Auto" />
-                                                                                <RowDefinition Height="*" />
-                                                                            </Grid.RowDefinitions>
-                                                                            <Grid.ColumnDefinitions>
-                                                                                <ColumnDefinition Width="2*"/>
-                                                                                <ColumnDefinition Width="*"/>
-                                                                                <ColumnDefinition Width="*"/>
-                                                                                <ColumnDefinition Width="*"/>
-                                                                            </Grid.ColumnDefinitions>
-                                                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding drawableTextureCount, StringFormat='Textures: {0}'}"></TextBlock>
-                                                                            <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="40, -35, 0, 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Content="Remove" Height="18" FontSize="10" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" DataContext="{Binding drawableIndex}" Click="Button_Click_Remove"></Button>
-                                                                            <StackPanel Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                                                                                <TextBlock ToolTip="Don't edit propMask if you don't know what are you doing!" Text="propMask: "></TextBlock>
-                                                                                <xctk:IntegerUpDown Minimum="1" Tag="{Binding drawableIndex}" ValueChanged="propMask_Changed" MaxHeight="25" Width="45" ToolTip="Don't edit propMask if you don't know what are you doing!" Value="{Binding drawablePropMask}" />
-                                                                            </StackPanel>
-                                                                            <StackPanel Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
-                                                                                <TextBlock ToolTip="Don't edit numAlternatives if you don't know what are you doing!" Text="numAlternatives: "></TextBlock>
-                                                                                <xctk:IntegerUpDown Minimum="0" Tag="{Binding drawableIndex}" ValueChanged="numAlternatives_Changed"  MaxHeight="25" Width="45" ToolTip="Don't edit numAlternatives if you don't know what are you doing!" Value="{Binding drawableAlternatives}" />
-                                                                            </StackPanel>
-                                                                            <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Horizontal">
-                                                                                <TextBlock ToolTip="Don't edit clothData if you don't know what are you doing!" Text="clothData: "></TextBlock>
-                                                                                <ComboBox SelectedIndex="0" Width="60">
-                                                                                    <ComboBoxItem Content="False" />
-                                                                                    <ComboBoxItem Content="True" />
-                                                                                </ComboBox>
-                                                                            </StackPanel>
-                                                                            <Expander Grid.Row="1" Grid.Column="0" Margin="0, 0, 0, 5" Header="View textures">
+                <GroupBox Grid.Row="0" Margin="5,5,5,5" Header="Components">
+                    <Grid Height="auto">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ItemsControl Name="ComponentsItemsControl" Grid.RowSpan="12">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <Expander Grid.Row="0">
+                                            <Expander.Header >
+                                                <TextBlock Background="LightGray" FontSize="20" Foreground="Black" Text="{Binding compHeader}" HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}" />
+                                            </Expander.Header>
+                                            <GroupBox>
+                                                <GroupBox.Header>
+                                                    <StackPanel>
+                                                        <TextBlock FontWeight="Bold" Text="{Binding compHeader, StringFormat=' {0} Component'}"></TextBlock>
+                                                    </StackPanel>
+                                                </GroupBox.Header>
+                                                <GroupBox.Content>
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                        </Grid.RowDefinitions>
+                                                        <ItemsControl Grid.Row="0" ItemsSource="{Binding compList}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Grid Margin="0,0,0,5">
+                                                                        <GroupBox>
+                                                                            <GroupBox.Header>
+                                                                                <StackPanel Orientation="Horizontal">
+                                                                                    <TextBlock FontWeight="Bold" Text="{Binding drawableIndex, StringFormat=' {0:0#,#}'}"></TextBlock>
+                                                                                </StackPanel>
+                                                                            </GroupBox.Header>
+                                                                            <GroupBox.Content>
+                                                                                <Grid>
+                                                                                    <Grid.RowDefinitions>
+                                                                                        <RowDefinition Height="*" />
+                                                                                        <RowDefinition Height="Auto" />
+                                                                                        <RowDefinition Height="*" />
+                                                                                    </Grid.RowDefinitions>
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="2*"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                    </Grid.ColumnDefinitions>
+                                                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding drawableTextureCount, StringFormat='Textures: {0}'}"></TextBlock>
+                                                                                    <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="40, -35, 0, 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Content="Remove" Height="18" FontSize="10" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" DataContext="{Binding drawableIndex}" Click="Button_Click_RemoveComponent"></Button>
+                                                                                    <StackPanel Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                                                                        <TextBlock ToolTip="Don't edit propMask if you don't know what are you doing!" Text="propMask: "></TextBlock>
+                                                                                        <xctk:IntegerUpDown Minimum="1" Tag="{Binding drawableIndex}" ValueChanged="propMask_Changed" MaxHeight="25" Width="45" ToolTip="Don't edit propMask if you don't know what are you doing!" Value="{Binding drawablePropMask}" />
+                                                                                    </StackPanel>
+                                                                                    <StackPanel Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
+                                                                                        <TextBlock ToolTip="Don't edit numAlternatives if you don't know what are you doing!" Text="numAlternatives: "></TextBlock>
+                                                                                        <xctk:IntegerUpDown Minimum="0" Tag="{Binding drawableIndex}" ValueChanged="numAlternatives_Changed"  MaxHeight="25" Width="45" ToolTip="Don't edit numAlternatives if you don't know what are you doing!" Value="{Binding drawableAlternatives}" />
+                                                                                    </StackPanel>
+                                                                                    <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Horizontal">
+                                                                                        <TextBlock ToolTip="Don't edit clothData if you don't know what are you doing!" Text="clothData: "></TextBlock>
+                                                                                        <ComboBox SelectedIndex="0" Width="60">
+                                                                                            <ComboBoxItem Content="False" />
+                                                                                            <ComboBoxItem Content="True" />
+                                                                                        </ComboBox>
+                                                                                    </StackPanel>
+                                                                                    <Expander Grid.Row="1" Grid.Column="0" Margin="0, 0, 0, 5" Header="View textures">
+                                                                                        <Grid>
+                                                                                            <Grid.RowDefinitions>
+                                                                                                <RowDefinition Height="Auto" />
+                                                                                                <RowDefinition Height="*" />
+                                                                                            </Grid.RowDefinitions>
+                                                                                            <Grid Grid.Row="0" Margin="0, 5, 0, 5">
+                                                                                                <Grid.ColumnDefinitions>
+                                                                                                    <ColumnDefinition Width="*"/>
+                                                                                                    <ColumnDefinition Width="*"/>
+                                                                                                </Grid.ColumnDefinitions>
+                                                                                                <Button Grid.Column="0" HorizontalAlignment="Left" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" +1 texture " Click="Button_Click_AddComponent"></Button>
+                                                                                                <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" -1 texture " Click="Button_Click_RemoveComponent"></Button>
+                                                                                            </Grid>
+                                                                                            <ItemsControl Grid.Row="1" ItemsSource="{Binding drawableTextures}">
+                                                                                                <ItemsControl.ItemTemplate>
+                                                                                                    <DataTemplate>
+                                                                                                        <Grid>
+                                                                                                            <GroupBox Grid.Row="0">
+                                                                                                                <GroupBox.Header>
+                                                                                                                    <StackPanel>
+                                                                                                                        <TextBlock Text="{Binding textureIndex, StringFormat='Texture letter: {0}'}"></TextBlock>
+                                                                                                                    </StackPanel>
+                                                                                                                </GroupBox.Header>
+                                                                                                                <GroupBox.Content>
+                                                                                                                    <StackPanel>
+                                                                                                                        <TextBlock Text="{Binding textureTexId, StringFormat='texId: {0}'}"></TextBlock>
+                                                                                                                    </StackPanel>
+                                                                                                                </GroupBox.Content>
+                                                                                                            </GroupBox>
+                                                                                                        </Grid>
+                                                                                                    </DataTemplate>
+                                                                                                </ItemsControl.ItemTemplate>
+                                                                                            </ItemsControl>
+                                                                                        </Grid>
+                                                                                    </Expander>
+                                                                                    <Expander Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="5, 5, 0, 5" Header="View component properties">
+                                                                                        <Grid>
+                                                                                            <GroupBox>
+                                                                                                <GroupBox.Header>
+                                                                                                    <StackPanel>
+                                                                                                        <TextBlock Text="Component properties - don't touch it if you don't know what are you doing"></TextBlock>
+                                                                                                    </StackPanel>
+                                                                                                </GroupBox.Header>
+                                                                                                <GroupBox.Content>
+                                                                                                    <ItemsControl ItemsSource="{Binding drawableInfo}">
+                                                                                                        <ItemsControl.ItemTemplate>
+                                                                                                            <DataTemplate>
+                                                                                                                <StackPanel Orientation="Vertical">
+                                                                                                                    <Grid>
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <Label Margin="5">hash__2FD08CEF:</Label>
+                                                                                                                        <TextBox Grid.Column="1" Margin="6" Text="{Binding infoHash_2FD08CEF}"></TextBox>
+                                                                                                                    </Grid>
+                                                                                                                    <Grid>
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <Label Margin="5">hash__FC507D28:</Label>
+                                                                                                                        <TextBox Grid.Column="1" Margin="6" Text="{Binding infoHash_FC507D28}"></TextBox>
+                                                                                                                    </Grid>
+                                                                                                                    <Grid ToolTip="Currently not implemented :(">
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <Label Margin="5">hash__07AE529D:</Label>
+                                                                                                                        <TextBox IsEnabled="False" Grid.Column="1" Margin="6" Text="{Binding infoHash_07AE529D_Formatted}"></TextBox>
+                                                                                                                    </Grid>
+                                                                                                                    <Grid>
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <Label Margin="5">Flags:</Label>
+                                                                                                                        <TextBox Grid.Column="1" Margin="6" Text="{Binding infoFlags}"></TextBox>
+                                                                                                                    </Grid>
+                                                                                                                    <Grid>
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <Label Margin="5">Inclusions:</Label>
+                                                                                                                        <TextBox Grid.Column="1" Margin="6" Text="{Binding infoInclusions}"></TextBox>
+                                                                                                                    </Grid>
+                                                                                                                    <Grid>
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <Label Margin="5">Exclusions:</Label>
+                                                                                                                        <TextBox Grid.Column="1" Margin="6" Text="{Binding infoExclusions}"></TextBox>
+                                                                                                                    </Grid>
+                                                                                                                    <Grid ToolTip="Not sure if user should be able to change that">
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <Label Margin="5">hash__6032815C:</Label>
+                                                                                                                        <TextBox IsEnabled="False" Grid.Column="1" Margin="6" Text="{Binding infoHash_6032815C}"></TextBox>
+                                                                                                                    </Grid>
+                                                                                                                    <Grid>
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <Label Margin="5">hash__7E103C8B:</Label>
+                                                                                                                        <TextBox Grid.Column="1" Margin="6" Text="{Binding infoHash_7E103C8B}"></TextBox>
+                                                                                                                    </Grid>
+                                                                                                                </StackPanel>
+                                                                                                            </DataTemplate>
+                                                                                                        </ItemsControl.ItemTemplate>
+                                                                                                    </ItemsControl>
+                                                                                                </GroupBox.Content>
+                                                                                            </GroupBox>
+                                                                                        </Grid>
+                                                                                    </Expander>
+                                                                                </Grid>
+                                                                            </GroupBox.Content>
+                                                                        </GroupBox>
+                                                                    </Grid>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                        <Grid Grid.Row="1" Margin="0, 15, 0, 0">
+                                                            <Button HorizontalAlignment="Left" Width="auto" Height="auto" Content="Add new drawable" DataContext="{Binding compHeader}" Click="Button_Click_AddComponent"/>
+                                                        </Grid>
+                                                    </Grid>
+                                                </GroupBox.Content>
+                                            </GroupBox>
+                                        </Expander>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                    </Grid>
+                </GroupBox>
+                
+                <GroupBox Grid.Row="1" Margin="5,5,5,5" Header="Props">
+                    <Grid Height="auto">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ItemsControl Name="PropsItemsControl" Grid.RowSpan="5">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <Expander Grid.Row="0">
+                                            <Expander.Header>
+                                                <TextBlock Background="LightGray" FontSize="20" Foreground="Black" Text="{Binding propHeader}" HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWayToSource}" />
+                                            </Expander.Header>
+                                            <GroupBox>
+                                                <GroupBox.Header>
+                                                    <StackPanel>
+                                                        <TextBlock FontWeight="Bold" Text="{Binding propHeader, StringFormat=' {0} Prop'}"></TextBlock>
+                                                    </StackPanel>
+                                                </GroupBox.Header>
+                                                <GroupBox.Content>
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                        </Grid.RowDefinitions>
+                                                        <ItemsControl Grid.Row="0" ItemsSource="{Binding propList}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Grid Margin="0,0,0,5">
+                                                                        <GroupBox>
+                                                                            <GroupBox.Header>
+                                                                                <StackPanel Orientation="Horizontal">
+                                                                                    <TextBlock FontWeight="Bold" Text="{Binding propIndex, StringFormat=' {0:0#,#}'}"></TextBlock>
+                                                                                </StackPanel>
+                                                                            </GroupBox.Header>
+                                                                            <GroupBox.Content>
                                                                                 <Grid>
                                                                                     <Grid.RowDefinitions>
                                                                                         <RowDefinition Height="*" />
                                                                                         <RowDefinition Height="*" />
                                                                                     </Grid.RowDefinitions>
-                                                                                    <Grid Grid.Row="0" Margin="0, 5, 0, 5">
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                    </Grid.ColumnDefinitions>
+                                                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding propTextureCount, StringFormat='Textures: {0}'}"></TextBlock>
+                                                                                    <Button Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="40, -35, 0, 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Content="Remove" Height="18" FontSize="10" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" DataContext="{Binding propIndex}" Click="Button_Click_RemoveProp"></Button>
+                                                                                    <Grid Grid.Row="1" Grid.ColumnSpan="4">
+                                                                                        <Grid.RowDefinitions>
+                                                                                            <RowDefinition Height="*" />
+                                                                                        </Grid.RowDefinitions>
                                                                                         <Grid.ColumnDefinitions>
                                                                                             <ColumnDefinition Width="*"/>
-                                                                                            <ColumnDefinition Width="*"/>
+                                                                                            <ColumnDefinition Width="2*"/>
                                                                                         </Grid.ColumnDefinitions>
-                                                                                        <Button Grid.Column="0" HorizontalAlignment="Left" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" +1 texture " Click="Button_Click_Add"></Button>
-                                                                                        <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" -1 texture " Click="Button_Click_Remove"></Button>
-                                                                                    </Grid>
-                                                                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding drawableTextures}">
-                                                                                        <ItemsControl.ItemTemplate>
-                                                                                            <DataTemplate>
-                                                                                                <Grid>
-                                                                                                    <GroupBox Grid.Row="0">
-                                                                                                        <GroupBox.Header>
-                                                                                                            <StackPanel>
-                                                                                                                <TextBlock Text="{Binding textureIndex, StringFormat='Texture letter: {0}'}"></TextBlock>
-                                                                                                            </StackPanel>
-                                                                                                        </GroupBox.Header>
-                                                                                                        <GroupBox.Content>
-                                                                                                            <StackPanel>
-                                                                                                                <TextBlock Text="{Binding textureTexId, StringFormat='texId: {0}'}"></TextBlock>
-                                                                                                            </StackPanel>
-                                                                                                        </GroupBox.Content>
-                                                                                                    </GroupBox>
-
+                                                                                        <Expander Grid.Row="0" Grid.Column="0" Margin="0, 5, 0, 5" Header="View textures">
+                                                                                            <Grid>
+                                                                                                <Grid.RowDefinitions>
+                                                                                                    <RowDefinition Height="*" />
+                                                                                                    <RowDefinition Height="*" />
+                                                                                                </Grid.RowDefinitions>
+                                                                                                <Grid Grid.Row="0" Margin="0, 5, 0, 5">
+                                                                                                    <Grid.ColumnDefinitions>
+                                                                                                        <ColumnDefinition Width="*"/>
+                                                                                                        <ColumnDefinition Width="*"/>
+                                                                                                    </Grid.ColumnDefinitions>
+                                                                                                    <Button Grid.Column="0" HorizontalAlignment="Left" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" +1 texture " Click="Button_Click_AddProp"></Button>
+                                                                                                    <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" -1 texture " Click="Button_Click_RemoveProp"></Button>
                                                                                                 </Grid>
-                                                                                            </DataTemplate>
-
-                                                                                        </ItemsControl.ItemTemplate>
-
-                                                                                    </ItemsControl>
-
+                                                                                                <ItemsControl Grid.Row="1" ItemsSource="{Binding propTextureList}">
+                                                                                                    <ItemsControl.ItemTemplate>
+                                                                                                        <DataTemplate>
+                                                                                                            <Grid>
+                                                                                                                <GroupBox Grid.Row="0">
+                                                                                                                    <GroupBox.Header>
+                                                                                                                        <StackPanel>
+                                                                                                                            <TextBlock Text="{Binding textureIndex, StringFormat='Texture letter: {0}'}"></TextBlock>
+                                                                                                                        </StackPanel>
+                                                                                                                    </GroupBox.Header>
+                                                                                                                    <GroupBox.Content>
+                                                                                                                        <Expander Header="Texture properties">
+                                                                                                                            <StackPanel>
+                                                                                                                                <TextBlock FontWeight="Light" Text="Should these be editable? - Let me know!"></TextBlock>
+                                                                                                                                <TextBlock Text="{Binding propInclusions, StringFormat='inclusions: {0}'}"></TextBlock>
+                                                                                                                                <TextBlock Text="{Binding propExclusions, StringFormat='exclusions: {0}'}"></TextBlock>
+                                                                                                                                <TextBlock Text="{Binding propTexId, StringFormat='texId: {0}'}"></TextBlock>
+                                                                                                                                <TextBlock Text="{Binding propInclusionId, StringFormat='inclusionId: {0}'}"></TextBlock>
+                                                                                                                                <TextBlock Text="{Binding propExclusionId, StringFormat='exclusionId: {0}'}"></TextBlock>
+                                                                                                                                <TextBlock Text="{Binding propDistribution, StringFormat='distribution: {0}'}"></TextBlock>
+                                                                                                                            </StackPanel>
+                                                                                                                        </Expander>
+                                                                                                                    </GroupBox.Content>
+                                                                                                                </GroupBox>
+                                                                                                            </Grid>
+                                                                                                        </DataTemplate>
+                                                                                                    </ItemsControl.ItemTemplate>
+                                                                                                </ItemsControl>
+                                                                                            </Grid>
+                                                                                        </Expander>
+                                                                                        <Expander Grid.Row="0" Grid.Column="1" Margin="5, 5, 0, 5" Header="View prop properties">
+                                                                                            <Grid>
+                                                                                                <GroupBox>
+                                                                                                    <GroupBox.Header>
+                                                                                                        <StackPanel>
+                                                                                                            <TextBlock Text="Prop properties - don't touch it if you don't know what are you doing"></TextBlock>
+                                                                                                        </StackPanel>
+                                                                                                    </GroupBox.Header>
+                                                                                                    <GroupBox.Content>
+                                                                                                        <StackPanel Orientation="Vertical">
+                                                                                                            <Grid>
+                                                                                                                <Grid.ColumnDefinitions>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                </Grid.ColumnDefinitions>
+                                                                                                                <Label Margin="5">AudioId:</Label>
+                                                                                                                <TextBox Grid.Column="1" Margin="6" Text="{Binding propAudioId}"></TextBox>
+                                                                                                            </Grid>
+                                                                                                            <Grid ToolTip="Currently not implemented :(">
+                                                                                                                <Grid.ColumnDefinitions>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                </Grid.ColumnDefinitions>
+                                                                                                                <Label Margin="5">ExpressionMods:</Label>
+                                                                                                                <TextBox IsEnabled="False" Grid.Column="1" Margin="6" Text="{Binding expressionModsFormatted}"></TextBox>
+                                                                                                            </Grid>
+                                                                                                            <Grid>
+                                                                                                                <Grid.ColumnDefinitions>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                </Grid.ColumnDefinitions>
+                                                                                                                <Label Margin="5">RenderFlags:</Label>
+                                                                                                                <TextBox Grid.Column="1" Margin="6" Text="{Binding propRenderFlags}"></TextBox>
+                                                                                                            </Grid>
+                                                                                                            <Grid>
+                                                                                                                <Grid.ColumnDefinitions>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                </Grid.ColumnDefinitions>
+                                                                                                                <Label Margin="5">PropFlags:</Label>
+                                                                                                                <TextBox Grid.Column="1" Margin="6" Text="{Binding propPropFlags}"></TextBox>
+                                                                                                            </Grid>
+                                                                                                            <Grid>
+                                                                                                                <Grid.ColumnDefinitions>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                </Grid.ColumnDefinitions>
+                                                                                                                <Label Margin="5">Flags:</Label>
+                                                                                                                <TextBox Grid.Column="1" Margin="6" Text="{Binding propFlags}"></TextBox>
+                                                                                                            </Grid>
+                                                                                                            <Grid>
+                                                                                                                <Grid.ColumnDefinitions>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                </Grid.ColumnDefinitions>
+                                                                                                                <Label Margin="5">hash__AC887A91:</Label>
+                                                                                                                <TextBox Grid.Column="1" Margin="6" Text="{Binding propHash_AC887A91}"></TextBox>
+                                                                                                            </Grid>
+                                                                                                        </StackPanel>
+                                                                                                    </GroupBox.Content>
+                                                                                                </GroupBox>
+                                                                                            </Grid>
+                                                                                        </Expander>
+                                                                                    </Grid>
                                                                                 </Grid>
-                                                                            </Expander>
-                                                                        </Grid>
-                                                                    </GroupBox.Content>
-                                                                </GroupBox>
-                                                            </Grid>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                                <Grid Grid.Row="1" Margin="0, 15, 0, 0">
-                                                    <Button HorizontalAlignment="Left" Width="auto" Height="auto" Content="Add new drawable" DataContext="{Binding compHeader}" Click="Button_Click_Add"/>
-                                                </Grid>
-                                            </Grid>
-                                        </GroupBox.Content>
-                                    </GroupBox>
-                                </Expander>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                
+                                                                            </GroupBox.Content>
+                                                                        </GroupBox>
+                                                                    </Grid>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                        <Grid Grid.Row="1" Margin="0, 15, 0, 0">
+                                                            <Button HorizontalAlignment="Left" Width="auto" Height="auto" Content="Add new prop" DataContext="{Binding propHeader}" Click="Button_Click_AddProp"/>
+                                                        </Grid>
+                                                    </Grid>
+                                                </GroupBox.Content>
+                                            </GroupBox>
+                                        </Expander>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </GroupBox>
             </Grid>
+            
             
         </ScrollViewer>
     </DockPanel>
