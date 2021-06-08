@@ -31,8 +31,10 @@ namespace YMTEditor
             }
             
             string usedPath = filePath;
+            CPedVariationInfo = xmlFile.Element("CPedVariationInfo").FirstAttribute != null
+                ? xmlFile.Element("CPedVariationInfo").FirstAttribute.Value.ToString()
+                : "";
 
-            CPedVariationInfo = xmlFile.Element("CPedVariationInfo").FirstAttribute.Value.ToString();
             bHasTexVariations = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bHasTexVariations").First().FirstAttribute.Value);
             bHasDrawblVariations = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bHasDrawblVariations").First().FirstAttribute.Value);
             bHasLowLODs = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bHasLowLODs").First().FirstAttribute.Value);
@@ -200,7 +202,10 @@ namespace YMTEditor
         private static XElement XML_Schema(string filePath)
         {
             // TOP OF FILE || START -> CPedVariationInfo
-            XElement xml = new XElement("CPedVariationInfo", new XAttribute("name", CPedVariationInfo));
+            XElement xml = CPedVariationInfo != ""
+                ? new XElement("CPedVariationInfo", new XAttribute("name", CPedVariationInfo))
+                : new XElement("CPedVariationInfo");
+
             xml.Add(new XElement("bHasTexVariations", new XAttribute("value", bHasTexVariations)));
             xml.Add(new XElement("bHasDrawblVariations", new XAttribute("value", bHasDrawblVariations)));
             xml.Add(new XElement("bHasLowLODs", new XAttribute("value", bHasLowLODs)));
