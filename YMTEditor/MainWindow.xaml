@@ -11,8 +11,14 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_New" IsEnabled="False" />
+                <Separator />
+                <MenuItem Header="_Open (YMT)" Click="OpenYMT_Click"/>
+                <MenuItem Header="_Save (YMT)" Click="SaveYMT_Click" />
+                
+                <Separator />
                 <MenuItem Header="_Open (XML)" Click="OpenXML_Click"/>
-                <MenuItem Header="_Save" Click="SaveXML_Click" />
+                <MenuItem Header="_Save (XML)" Click="SaveXML_Click" />
+                
                 <Separator />
                 <MenuItem Header="_Exit" IsEnabled="False" />
             </MenuItem>

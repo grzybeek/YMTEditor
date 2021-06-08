@@ -22,7 +22,8 @@ namespace YMTEditor
 
         public static ObservableCollection<ComponentData> Components;
         public static ObservableCollection<PropData> Props;
-        private RpfFileEntry rpf;
+
+        public RpfFileEntry entry;
 
         public MainWindow()
         {
@@ -54,6 +55,7 @@ namespace YMTEditor
             if (result == true)
             {
                 Components.Clear(); //so if we import another file when something is imported it will clear
+                Props.Clear();
                 string filename = xmlFile.FileName;
                 XMLHandler.LoadXML(filename);
                 _componentsMenu.IsEnabled = true;
@@ -66,7 +68,7 @@ namespace YMTEditor
 
         private void SaveXML_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog xmlFile = new OpenFileDialog
+            SaveFileDialog xmlFile = new SaveFileDialog
             {
                 DefaultExt = ".ymt.xml",
                 Filter = "Codewalker YMT XML (*.ymt.xml)|*.ymt.xml"
@@ -85,7 +87,7 @@ namespace YMTEditor
             OpenFileDialog ymtFile = new OpenFileDialog
             {
                 DefaultExt = ".ymt",
-                Filter = "YMT (*.ymt)|*.ymt"
+                Filter = "Peds YMT (*.ymt)|*.ymt"
             };
             bool? result = ymtFile.ShowDialog();
             if (result == true)
@@ -96,16 +98,39 @@ namespace YMTEditor
                 Components.Clear(); //so if we import another file when something is imported it will clear
                 Props.Clear();
 
-                //todo: loading from YMT file
+                PedFile ymt = new PedFile();
+                RpfFile.LoadResourceFile<PedFile>(ymt, ymtBytes, 2);
+                string xml = MetaXml.GetXml(ymt.Meta);
 
-                
-                
-                //XMLHandler.LoadXML(filename);
-                //_componentsMenu.IsEnabled = true;
-                //_componentsMenu.ToolTip = "Check/Uncheck components";
-                //_propsMenu.IsEnabled = true;
-                //_propsMenu.ToolTip = "Check/Uncheck props";
+                XMLHandler.LoadXML(xml);
+                _componentsMenu.IsEnabled = true;
+                _componentsMenu.ToolTip = "Check/Uncheck components";
+                _propsMenu.IsEnabled = true;
+                _propsMenu.ToolTip = "Check/Uncheck props";
                 SetLogMessage("Loaded YMT from path: " + filename);
+            }
+        }
+
+        private void SaveYMT_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog xmlFile = new SaveFileDialog
+            {
+                DefaultExt = ".ymt.xml",
+                Filter = "Peds YMT (*.ymt)|*.ymt"
+            };
+            bool? result = xmlFile.ShowDialog();
+            if (result == true)
+            {
+                string filename = xmlFile.FileName;
+                System.Xml.XmlDocument newXml = XMLHandler.SaveYMT(filename);
+                
+                PedFile ymt = new PedFile();
+                Meta meta = XmlMeta.GetMeta(newXml);
+                byte[] newYmtBytes = ResourceBuilder.Build(meta, 2);
+
+                File.WriteAllBytes(filename, newYmtBytes);
+                
+                SetLogMessage("Saved YMT to path: " + filename);
             }
         }
 
@@ -175,7 +200,6 @@ namespace YMTEditor
                     MessageBox.Show("Can't add more textures, limit is 26! (a-z)", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }            
-               
 
                 PropDrawable prop = Props.Where(p => p.propId == enumNumber).First().propList.Where(p => p.propIndex == index).First(); // get prop
                 int drawableToAddTexture = Props.Where(p => p.propId == enumNumber).First().propList.IndexOf(prop); //get index of our clicked prop in collection

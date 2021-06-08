@@ -18,7 +18,18 @@ namespace YMTEditor
 
         public static void LoadXML(string filePath)
         {
-            XDocument xmlFile = XDocument.Load(filePath);
+            XDocument xmlFile;
+            if (filePath.EndsWith(".xml"))
+            {
+                //loading *.ymt.xml
+                xmlFile = XDocument.Load(filePath);
+            }
+            else
+            {
+                //loading *.ymt
+                xmlFile = XDocument.Parse(filePath);
+            }
+            
             string usedPath = filePath;
 
             CPedVariationInfo = xmlFile.Element("CPedVariationInfo").FirstAttribute.Value.ToString();
@@ -345,6 +356,19 @@ namespace YMTEditor
             XElement xmlFile = XML_Schema(filePath);
             xmlFile.Save(filePath);
             MessageBox.Show("Saved to: " + filePath, "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public static System.Xml.XmlDocument SaveYMT(string filePath)
+        {
+            XElement xmlFile = XML_Schema(filePath);
+            xmlFile.Save(filePath);
+
+            //create XmlDocument from XElement (codewalker.core requires XmlDocument)
+            var xmldoc = new System.Xml.XmlDocument();
+            xmldoc.Load(xmlFile.CreateReader());
+
+            MessageBox.Show("Saved to: " + filePath, "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+            return xmldoc;
         }
 
         public static String Number2String(int number, bool isCaps)
