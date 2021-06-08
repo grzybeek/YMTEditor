@@ -2,6 +2,12 @@
 ## Used to edit *.ymt OR *.ymt.xml - (Peds clothes) files
 
 ### How it works: ###
+* __New *.YMT__
+	- Click File > New
+	- Add Components/Props by your choice
+	- Edit it
+	- Save it to *.YMT (or *.YMT.XML and import with Codewalker RPF Explorer)
+
 * __Import/Export *.YMT.XML__
     - Make sure you have latest Codewalker downloaded (You can get it at codewalker discord in channel #releases)
     - Find your .ymt file in Codewalker RPF Explorer, enable "Edit mode", right-click it and select "Export XML..."
@@ -26,7 +32,6 @@
 
 **Known bugs:**
   - expressionMods in component and prop section is not editable as i couldn't figure it how to do it (currently all P_HEAD props are saved with "-0.5 0 0 0 0", so if you are adding any head prop that shouldn't hide hair, you have to change that manually in .ymt)
-  - Components drop-down is not implemented - you can't add/remove components currently (for example: you can't add jbib if you don't have it in your .ymt already)
   - clothData drop-down is not implemented - .ymt will be saved with "false" value
 
 _My coding skills are not greatest but it works 😛_

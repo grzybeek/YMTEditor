@@ -10,15 +10,13 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_New" IsEnabled="False" />
+                <MenuItem Header="_New" Click="OpenNEW_Click" />
                 <Separator />
                 <MenuItem Header="_Open (YMT)" Click="OpenYMT_Click"/>
                 <MenuItem Header="_Save (YMT)" Click="SaveYMT_Click" />
-                
                 <Separator />
                 <MenuItem Header="_Open (XML)" Click="OpenXML_Click"/>
                 <MenuItem Header="_Save (XML)" Click="SaveXML_Click" />
-                
                 <Separator />
                 <MenuItem Header="_Exit" IsEnabled="False" />
             </MenuItem>
@@ -366,7 +364,7 @@
                                                                                         <Expander Grid.Row="0" Grid.Column="0" Margin="0, 5, 0, 5" Header="View textures">
                                                                                             <Grid>
                                                                                                 <Grid.RowDefinitions>
-                                                                                                    <RowDefinition Height="*" />
+                                                                                                    <RowDefinition Height="Auto" />
                                                                                                     <RowDefinition Height="*" />
                                                                                                 </Grid.RowDefinitions>
                                                                                                 <Grid Grid.Row="0" Margin="0, 5, 0, 5">

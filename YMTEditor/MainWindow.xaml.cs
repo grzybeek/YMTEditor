@@ -1,6 +1,7 @@
 ﻿using CodeWalker.GameFiles;
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Diagnostics;
@@ -42,6 +43,20 @@ namespace YMTEditor
 
             Props = new ObservableCollection<PropData>();
             PropsItemsControl.ItemsSource = Props;
+        }
+
+        private void OpenNEW_Click(object sender, RoutedEventArgs e)
+        {
+            Components.Clear(); //so if we import another file when something is imported it will clear
+            Props.Clear();
+
+            _componentsMenu.IsEnabled = true;
+            _componentsMenu.ToolTip = "Check/Uncheck components";
+            _propsMenu.IsEnabled = true;
+            _propsMenu.ToolTip = "Check/Uncheck props";
+
+            SetLogMessage("Created new file");
+            
         }
 
         private void OpenXML_Click(object sender, RoutedEventArgs e)
@@ -385,12 +400,129 @@ namespace YMTEditor
 
         private void ComponentsMenu_Click(object sender, RoutedEventArgs e)
         {
-            SetLogMessage("not implemented :(");
+
+            bool isChecked = (sender as MenuItem).IsChecked;
+            string clicked_name = Convert.ToString((sender as MenuItem).Name);
+            int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), clicked_name.ToLower());
+
+            if (isChecked) // if true it changed from false to true, so add new component
+            {
+                //add first drawable(000), default compInfo, and one texture
+                ComponentData newComponent = new ComponentData(clicked_name, enumNumber, 0, new ObservableCollection<ComponentDrawable>()) { compHeader = clicked_name.ToUpper() };
+                ComponentInfo defaultInfo = new ComponentInfo("none", "none", new string[] { "0", "0", "0", "0", "0" }, 0, "0", "0", "PV_COMP_HEAD", 0, enumNumber, 0); // default compInfo values
+                ComponentDrawable _newDrawable = new ComponentDrawable(000, 1, 1, 0, false, new ObservableCollection<ComponentTexture>(), new ObservableCollection<ComponentInfo>());
+                _newDrawable.drawableTextures.Add(new ComponentTexture("a", "0"));
+                _newDrawable.drawableInfo.Add(defaultInfo);
+
+                newComponent.compList.Add(_newDrawable);
+
+                //insert at 0, it will be sorted below
+                Components.Insert(0, newComponent);
+
+                SortComponents(Components); //sort components by compId
+                UpdateAllComponentsIndexes(); //update comp.compIndex of each component - i don't remember if any functions rely on this, i think it does -_-
+            }
+            else // it changed from true to false, so delete clicked component
+            {
+
+                //don't check options, always ask to remove because it can be missclicked if someone forgots he have option disabled
+                MessageBoxResult result = MessageBox.Show(this, "Do you want to remove WHOLE component " + clicked_name.ToUpper() + "?\n\nIt will REMOVE ALL DRAWABLES and it can't be restored.\n", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.OK)
+                {
+                    ComponentData compData = Components.Where(c => c.compId == enumNumber).First();
+                    int removeIndex = Components.IndexOf(compData);
+
+                    Components.RemoveAt(removeIndex);
+
+                    SortComponents(Components); //sort components by compId
+                    UpdateAllComponentsIndexes(); //update comp.compIndex of each component - i don't remember if any functions rely on this, i think it does -_-
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+
+        //taken and edited from https://stackoverflow.com/a/39043757
+        private static ObservableCollection<ComponentData> SortComponents(ObservableCollection<ComponentData> SortComponents)
+        {
+            ObservableCollection<ComponentData> temp;
+            temp = new ObservableCollection<ComponentData>(SortComponents.OrderBy(p => p.compId));
+            SortComponents.Clear();
+            foreach (var j in temp) SortComponents.Add(j);
+            return SortComponents;
+        }
+
+        private static ObservableCollection<PropData> SortProps(ObservableCollection<PropData> SortProps)
+        {
+            ObservableCollection<PropData> temp;
+            temp = new ObservableCollection<PropData>(SortProps.OrderBy(p => p.propId));
+            SortProps.Clear();
+            foreach (var j in temp) SortProps.Add(j);
+            return SortProps;
         }
 
         private void PropsMenu_Click(object sender, RoutedEventArgs e)
         {
-            SetLogMessage("not implemented :(");
+            bool isChecked = (sender as MenuItem).IsChecked;
+            string clicked_name = Convert.ToString((sender as MenuItem).Name);
+            int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), clicked_name.ToLower());
+
+            if (isChecked) // if true it changed from false to true, so add new component
+            {
+
+                //currently there is no ability to change it in window, so let's hardcode hats so it scale hair properly
+                //TODO: fix ^above^ because if someone add new addon hat which shouldn't scale down hair, it will anyway :(
+                string[] expressionMods;
+                if (clicked_name == "P_HEAD")
+                {
+                    expressionMods = new string[] { "-0.5", "0", "0", "0", "0" };
+                }
+                else
+                {
+                    expressionMods = new string[] { "0", "0", "0", "0", "0" };
+                }
+
+                //add first drawable(000), default compInfo, and one texture
+                PropData newProp = new PropData(clicked_name, enumNumber, new ObservableCollection<PropDrawable>()) { propHeader = clicked_name.ToUpper() };
+                PropDrawable newPropDrawable = new PropDrawable(0, "none", expressionMods, new ObservableCollection<PropTexture>(), "", 0, 0, enumNumber, 0, 0);
+                newPropDrawable.propTextureList.Add(new PropTexture("a", "0", "0", 0, 0, 0, 255));
+                newProp.propList.Add(newPropDrawable);
+
+                //insert at 0, it will be sorted below
+                Props.Insert(0, newProp);
+
+                SortProps(Props); //sort components by compId
+            }
+            else // it changed from true to false, so delete clicked component
+            {
+
+                //don't check options, always ask to remove because it can be missclicked if someone forgots he have option disabled
+                MessageBoxResult result = MessageBox.Show(this, "Do you want to remove WHOLE prop " + clicked_name.ToUpper() + "?\n\nIt will REMOVE ALL DRAWABLES and it can't be restored.\n", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.OK)
+                {
+                    PropData propData = Props.Where(p => p.propId == enumNumber).First();
+                    int removeIndex = Props.IndexOf(propData);
+
+                    Props.RemoveAt(removeIndex);
+
+                    SortProps(Props); 
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+
+        private void UpdateAllComponentsIndexes()
+        {
+            int compsCount = MainWindow.Components.Count();
+            for (int i = 0; i < compsCount; i++)
+            {
+                MainWindow.Components.ElementAt(i).compIndex = i;
+            }
         }
 
         private void UpdateDrawableComponentIndexes(ComponentData component)
