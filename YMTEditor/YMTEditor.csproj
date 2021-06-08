@@ -56,6 +56,9 @@
     <ApplicationIcon>ymteditor.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CodeWalker.Core">
+      <HintPath>D:\CodeWalker30_dev15\CodeWalker30_dev36\CodeWalker.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />

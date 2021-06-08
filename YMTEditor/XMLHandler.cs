@@ -157,7 +157,8 @@ namespace YMTEditor
                         _curPropDrawableIndex = 0;
                     }
 
-                    PropData _curPropData = MainWindow.Props.ElementAt(p_anchorId);
+                    PropData _curPropData = MainWindow.Props.Where(p => p.propId == p_anchorId).First();
+                    
                     PropDrawable _curPropDrawable = new PropDrawable(_curPropDrawableIndex, p_audioId, p_expressionMods, new ObservableCollection<PropTexture>(), p_renderFlag, p_propFlag, p_flag, p_anchorId, p_propId, p_hash);
                     
                     int texturePropIndex = 0;

@@ -1,8 +1,10 @@
-﻿using Microsoft.Win32;
+﻿using CodeWalker.GameFiles;
+using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,6 +22,7 @@ namespace YMTEditor
 
         public static ObservableCollection<ComponentData> Components;
         public static ObservableCollection<PropData> Props;
+        private RpfFileEntry rpf;
 
         public MainWindow()
         {
@@ -74,6 +77,35 @@ namespace YMTEditor
                 string filename = xmlFile.FileName;
                 XMLHandler.SaveXML(filename);
                 SetLogMessage("Saved XML to path: " + filename);
+            }
+        }
+
+        private void OpenYMT_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ymtFile = new OpenFileDialog
+            {
+                DefaultExt = ".ymt",
+                Filter = "YMT (*.ymt)|*.ymt"
+            };
+            bool? result = ymtFile.ShowDialog();
+            if (result == true)
+            {
+                string filename = ymtFile.FileName;
+                byte[] ymtBytes = File.ReadAllBytes(filename);
+
+                Components.Clear(); //so if we import another file when something is imported it will clear
+                Props.Clear();
+
+                //todo: loading from YMT file
+
+                
+                
+                //XMLHandler.LoadXML(filename);
+                //_componentsMenu.IsEnabled = true;
+                //_componentsMenu.ToolTip = "Check/Uncheck components";
+                //_propsMenu.IsEnabled = true;
+                //_propsMenu.ToolTip = "Check/Uncheck props";
+                SetLogMessage("Loaded YMT from path: " + filename);
             }
         }
 
@@ -135,8 +167,8 @@ namespace YMTEditor
                 int index = Convert.ToInt32(btn_parts[0]); //clicked number 000/001/002 etc
                 int txtCount = Convert.ToInt32(btn_parts[1]); // current textures
 
-                string propName = Convert.ToString((sender as Button).Tag); //drawable we are adding txt (p_head, p_ears etc)
-                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), propName.ToLower()); //0 = p_head, 1 = p_ears etc -> YMTTypes.cs (it is also anchorId of prop)
+                string propName = Convert.ToString((sender as Button).Tag); //drawable we are adding txt (p_head, p_eyes etc)
+                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), propName.ToLower()); //0 = p_head, 1 = p_eyes etc -> YMTTypes.cs (it is also anchorId of prop)
 
                 if (txtCount >= 26)
                 {
@@ -144,8 +176,9 @@ namespace YMTEditor
                     return;
                 }            
                
-                PropDrawable prop = Props.ElementAt(enumNumber).propList.Where(p => p.propIndex == index).First(); // get prop
-                int drawableToAddTexture = Props.ElementAt(enumNumber).propList.IndexOf(prop); //get index of our clicked prop in collection
+
+                PropDrawable prop = Props.Where(p => p.propId == enumNumber).First().propList.Where(p => p.propIndex == index).First(); // get prop
+                int drawableToAddTexture = Props.Where(p => p.propId == enumNumber).First().propList.IndexOf(prop); //get index of our clicked prop in collection
 
                 string txtLetter = XMLHandler.Number2String(txtCount, false);
                 prop.propTextureList.Add(new PropTexture(txtLetter, "0", "0", txtCount, 0, 0, 255));
@@ -157,10 +190,10 @@ namespace YMTEditor
             else //else add new drawable number
             {
 
-                string propName = btn; //drawable we are adding txt (p_head, p_ears etc)
-                int _index = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), propName.ToLower()); //0 = p_head, 1 = p_ears etc -> YMTTypes.cs (it is also anchorId of prop)
-
-                int drawIndex = Props.ElementAt(_index).propList.Count(); //prop drawable index (000, 001, 002 etc)
+                string propName = btn; //drawable we are adding txt (p_head, p_eyes etc)
+                int _index = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), propName.ToLower()); //0 = p_head, 1 = p_eyes etc -> YMTTypes.cs (it is also anchorId of prop)
+                
+                int drawIndex = Props.Where(p => p.propId == _index).First().propList.Count(); //prop drawable index (000, 001, 002 etc)
 
                 //currently there is no ability to change it in window, so let's hardcode hats so it scale hair properly
                 //TODO: fix ^above^ because if someone add new addon hat which shouldn't scale down hair, it will anyway :(
@@ -178,7 +211,7 @@ namespace YMTEditor
                 PropDrawable _newPropDrawable = new PropDrawable(drawIndex, "none", expressionMods, new ObservableCollection<PropTexture>(), "", 0, 0, _index, drawIndex, 0);
                 _newPropDrawable.propTextureList.Add(new PropTexture("a", "0", "0", 0, 0, 0, 255));
 
-                Props.ElementAt(_index).propList.Add(_newPropDrawable);
+                Props.Where(p => p.propId == _index).First().propList.Add(_newPropDrawable);
 
                 SetLogMessage("Added new prop (number " + String.Format("{0:D3}", drawIndex) + ") to " + btn + " prop");
             }
@@ -265,11 +298,11 @@ namespace YMTEditor
 
                 int drawableIndex = Convert.ToInt32(btn_parts[0]); //000, 001, 002 etc
                 int lastTxtIndex = Convert.ToInt32(btn_parts[1]); //last txt
-                string drawableName = Convert.ToString((sender as Button).Tag); //prop name (p_head, p_ears, etc)
+                string drawableName = Convert.ToString((sender as Button).Tag); //prop name (p_head, p_eyes, etc)
 
-                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), drawableName.ToLower()); //0 = p_head, 1 = p_ears etc -> YMTTypes.cs (it is also anchorId of prop)
+                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), drawableName.ToLower()); //0 = p_head, 1 = p_eyes etc -> YMTTypes.cs (it is also anchorId of prop)
 
-                PropDrawable prop = Props.ElementAt(enumNumber).propList.Where(p => p.propIndex == drawableIndex).First(); //get prop
+                PropDrawable prop = Props.Where(p => p.propId == enumNumber).First().propList.Where(p => p.propIndex == drawableIndex).First(); //get prop
                 int txtCount = prop.propTextureCount;
 
                 if (txtCount <= 1)
@@ -289,20 +322,21 @@ namespace YMTEditor
                 int clickedIndex = Convert.ToInt32(btn_parts[0]);
 
                 string drawableName = Convert.ToString((sender as Button).Tag);
-                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), drawableName.ToLower()); //0 = p_head, 1 = p_ears etc -> YMTTypes.cs (it is also anchorId of prop)
+                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), drawableName.ToLower()); //0 = p_head, 1 = p_eyes etc -> YMTTypes.cs (it is also anchorId of prop)
 
-                PropDrawable prop = Props.ElementAt(enumNumber).propList.Where(p => p.propIndex == clickedIndex).First();
-                int drawableToRemoveIndex = Props.ElementAt(enumNumber).propList.IndexOf(prop); 
+                PropData propData = Props.Where(p => p.propId == enumNumber).First();
+                PropDrawable prop = propData.propList.Where(p => p.propIndex == clickedIndex).First();
+                int drawableToRemoveIndex = propData.propList.IndexOf(prop); 
 
-                if (Props.ElementAt(enumNumber).propList.Count() > 1)
+                if (propData.propList.Count() > 1)
                 {
                     if (_removeAsk.IsChecked)
                     {
                         MessageBoxResult result = MessageBox.Show(this, "Do you want to remove prop drawable " + String.Format("{0:D3}", drawableToRemoveIndex) + "?\nIt can't be restored.\n\nThis box can be disabled in options.", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                         if (result == MessageBoxResult.OK)
                         {
-                            Props.ElementAt(enumNumber).propList.RemoveAt(drawableToRemoveIndex);
-                            UpdateDrawablePropIndexes(Props.ElementAt(enumNumber));
+                            propData.propList.RemoveAt(drawableToRemoveIndex);
+                            UpdateDrawablePropIndexes(propData);
                             SetLogMessage("Removed prop drawable (number " + String.Format("{0:D3}", drawableToRemoveIndex) + ") from " + drawableName + " prop | CHANGED ALL OTHER INDEX NUMBERS (!)");
                         }
                         else
@@ -312,8 +346,8 @@ namespace YMTEditor
                     }
                     else
                     {
-                        Props.ElementAt(enumNumber).propList.RemoveAt(drawableToRemoveIndex);
-                        UpdateDrawablePropIndexes(Props.ElementAt(enumNumber));
+                        propData.propList.RemoveAt(drawableToRemoveIndex);
+                        UpdateDrawablePropIndexes(propData);
                         SetLogMessage("Removed prop drawable (number " + String.Format("{0:D3}", drawableToRemoveIndex) + ") from " + drawableName + " prop | CHANGED ALL OTHER INDEX NUMBERS (!)");
                     }
                 }
