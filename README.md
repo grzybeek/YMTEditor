@@ -1,7 +1,10 @@
 # YMTEditor [WIP]
 ## Used to edit *.ymt OR *.ymt.xml - (Peds clothes) files
+### Using [Codewalker.Core](https://github.com/dexyfex/CodeWalker) by @dexyfex
+### Download YMTEditor [here](https://github.com/grzybeek/YMTEditor/releases) ###
 
-### How it works: ###
+
+#### How it works: ####
 * __New *.YMT__
 	- Click File > New
 	- Add Components/Props by your choice
