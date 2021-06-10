@@ -1,0 +1,36 @@
+﻿<Window x:Class="YMTEditor.NewYMTWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YMTEditor"
+        mc:Ignorable="d"
+        Title="Create new YMT..." Height="300" Width="500">
+    <Grid Margin="10">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" FontWeight="Bold">Select for which MP character your YMT will be:</Label>
+            <StackPanel Grid.Row="0" Margin="5,25,0,0">
+                <RadioButton Name="male" GroupName="genderType" Click="radio_click" Content="mp__m__freemode__01 (male)" IsChecked="True" ></RadioButton>
+                <RadioButton Name="female" GroupName="genderType" Click="radio_click" Content="mp__f__freemode__01 (female)" ></RadioButton>
+            </StackPanel>
+            <Label Grid.Row="1" FontWeight="Bold">Input your YMT name:</Label>
+            <StackPanel Grid.Row="1" Margin="5,25,0,0">
+                <TextBox Name="inputBox" Text="{Binding input, UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Left" Width="250"></TextBox>
+            </StackPanel>
+            <Label Grid.Row="2" FontWeight="Bold">Your full YMT name:</Label>
+            <StackPanel Grid.Row="2" Margin="5,25,0,0">
+                <TextBlock Name="FullYMTName" Text="{Binding fullName, UpdateSourceTrigger=PropertyChanged}"></TextBlock>
+            </StackPanel>
+            <Button Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="60" Height="25" Content="Submit" Click="ButtonSubmit_Click"></Button>
+            <Button Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="60" Height="25" Content="Help" Click="ButtonHelp_Click"></Button>
+        </Grid>
+    </Grid>
+</Window>

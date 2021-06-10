@@ -20,7 +20,7 @@
                 <Separator />
                 <MenuItem Header="_Exit" IsEnabled="False" />
             </MenuItem>
-            <MenuItem Name="ComponentsMenu" Header="_Components" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Open XML file to edit components" >
+            <MenuItem Name="ComponentsMenu" Header="_Components" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Open XML/YMT file to edit components" >
                 <MenuItem Name="head" Header="HEAD" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
                 <MenuItem Name="berd" Header="BERD" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
                 <MenuItem Name="hair" Header="HAIR" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
@@ -35,7 +35,7 @@
                 <MenuItem Name="jbib" Header="JBIB" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
             </MenuItem>
             <!-- Props taken from, are they even real?: https://forum.cfx.re/t/how-to-streaming-addon-clothes-and-ped-props-for-mp-freemode-models/458854 -->
-            <MenuItem Name="PropsMenu" Header="_Props" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Open XML file to edit props" >
+            <MenuItem Name="PropsMenu" Header="_Props" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Open XML/YMT file to edit props" >
                 <MenuItem Name="p_head" Header="P__HEAD" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
                 <MenuItem Name="p_eyes" Header="P__EYES" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
                 <MenuItem Name="p_ears" Header="P__EARS" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>

@@ -9,12 +9,12 @@ namespace YMTEditor
 {
     class XMLHandler
     {
-        private static string CPedVariationInfo = "TODO"; //TODO: if not set it will be "TODO", implement changing it in main window (only for new files)
+        public static string CPedVariationInfo;
         private static bool bHasTexVariations = false;
         private static bool bHasDrawblVariations = false;
         private static bool bHasLowLODs = false;
         private static bool bIsSuperLOD = false;
-        private static string dlcName = "TODO";
+        public static string dlcName;
 
         public static void LoadXML(string filePath)
         {

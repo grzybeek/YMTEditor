@@ -24,7 +24,9 @@ namespace YMTEditor
         public static ObservableCollection<ComponentData> Components;
         public static ObservableCollection<PropData> Props;
 
-        public RpfFileEntry entry;
+        //set only with doing new .ymt
+        private string fullName; //whole name "mp_m_freemode_01_XXXXXX"
+        private string dlcName; //only XXXXX
 
         public MainWindow()
         {
@@ -47,8 +49,15 @@ namespace YMTEditor
 
         private void OpenNEW_Click(object sender, RoutedEventArgs e)
         {
-            Components.Clear(); //so if we import another file when something is imported it will clear
-            Props.Clear();
+            ClearEverything(); //so if we import another file when something is imported it will clear
+
+            NewYMTWindow newWindow = new NewYMTWindow();
+            newWindow.ShowDialog();
+
+            fullName = newWindow.fullName;
+            dlcName = newWindow.input;
+            XMLHandler.CPedVariationInfo = dlcName;
+            XMLHandler.dlcName = dlcName;
 
             _componentsMenu.IsEnabled = true;
             _componentsMenu.ToolTip = "Check/Uncheck components";
@@ -56,7 +65,8 @@ namespace YMTEditor
             _propsMenu.ToolTip = "Check/Uncheck props";
 
             SetLogMessage("Created new file");
-            
+
+            this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt";
         }
 
         private void OpenXML_Click(object sender, RoutedEventArgs e)
@@ -69,8 +79,8 @@ namespace YMTEditor
             bool? result = xmlFile.ShowDialog();
             if (result == true)
             {
-                Components.Clear(); //so if we import another file when something is imported it will clear
-                Props.Clear();
+                ClearEverything(); //so if we import another file when something is imported it will clear
+                
                 string filename = xmlFile.FileName;
                 XMLHandler.LoadXML(filename);
                 _componentsMenu.IsEnabled = true;
@@ -78,6 +88,10 @@ namespace YMTEditor
                 _propsMenu.IsEnabled = true;
                 _propsMenu.ToolTip = "Check/Uncheck props";
                 SetLogMessage("Loaded XML from path: " + filename);
+
+                fullName = Path.GetFileNameWithoutExtension(filename);
+
+                this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt.xml";
             }
         }
 
@@ -86,7 +100,8 @@ namespace YMTEditor
             SaveFileDialog xmlFile = new SaveFileDialog
             {
                 DefaultExt = ".ymt.xml",
-                Filter = "Codewalker YMT XML (*.ymt.xml)|*.ymt.xml"
+                Filter = "Codewalker YMT XML (*.ymt.xml)|*.ymt.xml",
+                FileName = fullName
             };
             bool? result = xmlFile.ShowDialog();
             if (result == true)
@@ -110,8 +125,7 @@ namespace YMTEditor
                 string filename = ymtFile.FileName;
                 byte[] ymtBytes = File.ReadAllBytes(filename);
 
-                Components.Clear(); //so if we import another file when something is imported it will clear
-                Props.Clear();
+                ClearEverything(); //so if we import another file when something is imported it will clear
 
                 PedFile ymt = new PedFile();
                 RpfFile.LoadResourceFile<PedFile>(ymt, ymtBytes, 2);
@@ -123,6 +137,10 @@ namespace YMTEditor
                 _propsMenu.IsEnabled = true;
                 _propsMenu.ToolTip = "Check/Uncheck props";
                 SetLogMessage("Loaded YMT from path: " + filename);
+
+                fullName = Path.GetFileNameWithoutExtension(filename);
+
+                this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt";
             }
         }
 
@@ -131,7 +149,8 @@ namespace YMTEditor
             SaveFileDialog xmlFile = new SaveFileDialog
             {
                 DefaultExt = ".ymt.xml",
-                Filter = "Peds YMT (*.ymt)|*.ymt"
+                Filter = "Peds YMT (*.ymt)|*.ymt",
+                FileName = fullName
             };
             bool? result = xmlFile.ShowDialog();
             if (result == true)
@@ -556,6 +575,7 @@ namespace YMTEditor
 
         private void numAlternatives_Changed(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+            //todo
             SetLogMessage("numAlternatives changed to: " + e.NewValue);
         }
 
@@ -600,7 +620,24 @@ namespace YMTEditor
             SetLogMessage("Saved options, will be restored when opening the program");
         }
 
+        private void ClearEverything()
+        {
+            var allItemsComps = _componentsMenu.Items.Cast<MenuItem>().ToArray();
+            var allItemsProps = _propsMenu.Items.Cast<MenuItem>().ToArray();
 
+            foreach (var item in allItemsComps)
+            {
+                item.IsChecked = false;
+            }
+
+            foreach (var item in allItemsProps)
+            {
+                item.IsChecked = false;
+            }
+
+            Components.Clear();
+            Props.Clear();
+            
+        }
     }
-
 }

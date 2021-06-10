@@ -95,6 +95,9 @@
     <Compile Include="ComponentDrawable.cs" />
     <Compile Include="ComponentData.cs" />
     <Compile Include="ComponentTexture.cs" />
+    <Compile Include="NewYMTWindow.xaml.cs">
+      <DependentUpon>NewYMTWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="YMTTypes.cs" />
     <Compile Include="PropTexture.cs" />
     <Compile Include="XMLHandler.cs" />
@@ -102,6 +105,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="NewYMTWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
