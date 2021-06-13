@@ -268,16 +268,34 @@ namespace YMTEditor
                 foreach (var comp in c.compList)
                 {
                     XElement compInfoItem = new XElement("Item");
-                    compInfoItem.Add(new XElement("hash_2FD08CEF", comp.drawableInfo.First().infoHash_2FD08CEF)); //not sure what it does
-                    compInfoItem.Add(new XElement("hash_FC507D28", comp.drawableInfo.First().infoHash_FC507D28)); //not sure what it does
-                    compInfoItem.Add(new XElement("hash_07AE529D", String.Join(" ", comp.drawableInfo.First().infoHash_07AE529D)));  //component expressionMods (?) - gives ability to do heels
-                    compInfoItem.Add(new XElement("flags", new XAttribute("value", comp.drawableInfo.First().infoFlags))); //not sure what it does
-                    compInfoItem.Add(new XElement("inclusions", comp.drawableInfo.First().infoInclusions)); //not sure what it does
-                    compInfoItem.Add(new XElement("exclusions", comp.drawableInfo.First().infoExclusions)); //not sure what it does
-                    compInfoItem.Add(new XElement("hash_6032815C", comp.drawableInfo.First().infoHash_6032815C)); //probably everything has PV_COMP_HEAD (?)
-                    compInfoItem.Add(new XElement("hash_7E103C8B", new XAttribute("value", comp.drawableInfo.First().infoHash_7E103C8B))); //not sure what it does
-                    compInfoItem.Add(new XElement("hash_D12F579D", new XAttribute("value", c.compId))); //component id (jbib = 11, lowr = 4, etc)
-                    compInfoItem.Add(new XElement("hash_FA1F27BF", new XAttribute("value", comp.drawableIndex))); // drawable index (000, 001, 002 etc)
+                    if(comp.drawableInfo.FirstOrDefault() == null) //check if there is compInfo entry when we are saving, if not, create new one default
+                    {
+                        compInfoItem.Add(new XElement("hash_2FD08CEF", "none")); //not sure what it does
+                        compInfoItem.Add(new XElement("hash_FC507D28", "none")); //not sure what it does
+                        compInfoItem.Add(new XElement("hash_07AE529D", String.Join(" ", new string[] { "0", "0", "0", "0", "0" })));  //component expressionMods (?) - gives ability to do heels
+                        compInfoItem.Add(new XElement("flags", new XAttribute("value", 0))); //not sure what it does
+                        compInfoItem.Add(new XElement("inclusions", "0")); //not sure what it does
+                        compInfoItem.Add(new XElement("exclusions", "0")); //not sure what it does
+                        compInfoItem.Add(new XElement("hash_6032815C", "PV_COMP_HEAD")); //probably everything has PV_COMP_HEAD (?)
+                        compInfoItem.Add(new XElement("hash_7E103C8B", new XAttribute("value", 0))); //not sure what it does
+                        compInfoItem.Add(new XElement("hash_D12F579D", new XAttribute("value", c.compId))); //component id (jbib = 11, lowr = 4, etc)
+                        compInfoItem.Add(new XElement("hash_FA1F27BF", new XAttribute("value", comp.drawableIndex))); // drawable index (000, 001, 002 etc)
+                    }
+                    else
+                    {
+                        compInfoItem.Add(new XElement("hash_2FD08CEF", comp.drawableInfo.First().infoHash_2FD08CEF)); //not sure what it does
+                        compInfoItem.Add(new XElement("hash_FC507D28", comp.drawableInfo.First().infoHash_FC507D28)); //not sure what it does
+                        compInfoItem.Add(new XElement("hash_07AE529D", String.Join(" ", comp.drawableInfo.First().infoHash_07AE529D)));  //component expressionMods (?) - gives ability to do heels
+                        compInfoItem.Add(new XElement("flags", new XAttribute("value", comp.drawableInfo.First().infoFlags))); //not sure what it does
+                        compInfoItem.Add(new XElement("inclusions", comp.drawableInfo.First().infoInclusions)); //not sure what it does
+                        compInfoItem.Add(new XElement("exclusions", comp.drawableInfo.First().infoExclusions)); //not sure what it does
+                        compInfoItem.Add(new XElement("hash_6032815C", comp.drawableInfo.First().infoHash_6032815C)); //probably everything has PV_COMP_HEAD (?)
+                        compInfoItem.Add(new XElement("hash_7E103C8B", new XAttribute("value", comp.drawableInfo.First().infoHash_7E103C8B))); //not sure what it does
+                        compInfoItem.Add(new XElement("hash_D12F579D", new XAttribute("value", c.compId))); //component id (jbib = 11, lowr = 4, etc)
+                        compInfoItem.Add(new XElement("hash_FA1F27BF", new XAttribute("value", comp.drawableIndex))); // drawable index (000, 001, 002 etc)
+                    }
+                    
+                    
                     compInfo.Add(compInfoItem);
                 }
             }
