@@ -1,15 +1,14 @@
 ﻿using CodeWalker.GameFiles;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Navigation;
 
 namespace YMTEditor
@@ -30,6 +29,7 @@ namespace YMTEditor
 
         public MainWindow()
         {
+
             InitializeComponent();
 
             _componentsMenu = (MenuItem)FindName("ComponentsMenu");
@@ -45,6 +45,8 @@ namespace YMTEditor
 
             Props = new ObservableCollection<PropData>();
             PropsItemsControl.ItemsSource = Props;
+
+            CheckForUpdates();
         }
 
         private void OpenNEW_Click(object sender, RoutedEventArgs e)
@@ -82,16 +84,26 @@ namespace YMTEditor
                 ClearEverything(); //so if we import another file when something is imported it will clear
                 
                 string filename = xmlFile.FileName;
-                XMLHandler.LoadXML(filename);
-                _componentsMenu.IsEnabled = true;
-                _componentsMenu.ToolTip = "Check/Uncheck components";
-                _propsMenu.IsEnabled = true;
-                _propsMenu.ToolTip = "Check/Uncheck props";
-                SetLogMessage("Loaded XML from path: " + filename);
+                try
+                {
+                    XMLHandler.LoadXML(filename);
+                    _componentsMenu.IsEnabled = true;
+                    _componentsMenu.ToolTip = "Check/Uncheck components";
+                    _propsMenu.IsEnabled = true;
+                    _propsMenu.ToolTip = "Check/Uncheck props";
+                    SetLogMessage("Loaded XML from path: " + filename);
 
-                fullName = Path.GetFileNameWithoutExtension(filename);
+                    fullName = Path.GetFileNameWithoutExtension(filename); //removes .xml
+                    fullName = Path.GetFileNameWithoutExtension(fullName); //removes .ymt
 
-                this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt.xml";
+                    this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt.xml";
+                }
+                catch (Exception)
+                {
+                    ClearEverything();
+                    MessageBox.Show("Failed to load XML YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include XML YMT you tried to load!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
             }
         }
 
@@ -106,9 +118,17 @@ namespace YMTEditor
             bool? result = xmlFile.ShowDialog();
             if (result == true)
             {
-                string filename = xmlFile.FileName;
-                XMLHandler.SaveXML(filename);
-                SetLogMessage("Saved XML to path: " + filename);
+                try
+                {
+                    string filename = xmlFile.FileName;
+                    XMLHandler.SaveXML(filename);
+                    SetLogMessage("Saved XML to path: " + filename);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Failed to save XML YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include XML YMT you tried to save!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
             }
         }
 
@@ -131,16 +151,25 @@ namespace YMTEditor
                 RpfFile.LoadResourceFile<PedFile>(ymt, ymtBytes, 2);
                 string xml = MetaXml.GetXml(ymt.Meta);
 
-                XMLHandler.LoadXML(xml);
-                _componentsMenu.IsEnabled = true;
-                _componentsMenu.ToolTip = "Check/Uncheck components";
-                _propsMenu.IsEnabled = true;
-                _propsMenu.ToolTip = "Check/Uncheck props";
-                SetLogMessage("Loaded YMT from path: " + filename);
+                try
+                {
+                    XMLHandler.LoadXML(xml);
+                    _componentsMenu.IsEnabled = true;
+                    _componentsMenu.ToolTip = "Check/Uncheck components";
+                    _propsMenu.IsEnabled = true;
+                    _propsMenu.ToolTip = "Check/Uncheck props";
+                    SetLogMessage("Loaded YMT from path: " + filename);
 
-                fullName = Path.GetFileNameWithoutExtension(filename);
+                    fullName = Path.GetFileNameWithoutExtension(filename);
 
-                this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt";
+                    this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt";
+                }
+                catch (Exception)
+                {
+                    ClearEverything();
+                    MessageBox.Show("Failed to load YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include YMT you tried to load!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            
             }
         }
 
@@ -155,16 +184,25 @@ namespace YMTEditor
             bool? result = xmlFile.ShowDialog();
             if (result == true)
             {
-                string filename = xmlFile.FileName;
-                System.Xml.XmlDocument newXml = XMLHandler.SaveYMT(filename);
-                
-                PedFile ymt = new PedFile();
-                Meta meta = XmlMeta.GetMeta(newXml);
-                byte[] newYmtBytes = ResourceBuilder.Build(meta, 2);
+                try
+                {
+                    string filename = xmlFile.FileName;
+                    System.Xml.XmlDocument newXml = XMLHandler.SaveYMT(filename);
 
-                File.WriteAllBytes(filename, newYmtBytes);
-                
-                SetLogMessage("Saved YMT to path: " + filename);
+                    PedFile ymt = new PedFile();
+                    Meta meta = XmlMeta.GetMeta(newXml);
+                    byte[] newYmtBytes = ResourceBuilder.Build(meta, 2);
+
+                    File.WriteAllBytes(filename, newYmtBytes);
+
+                    SetLogMessage("Saved YMT to path: " + filename);
+
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Failed to save YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include YMT you tried to save!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            
             }
         }
 
@@ -638,6 +676,39 @@ namespace YMTEditor
             Components.Clear();
             Props.Clear();
             
+        }
+
+        //version compare taken and edited from https://github.com/smallo92/Ymap-YbnMover/blob/master/ymapmover/Startup.cs
+        private void CheckForUpdates()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion.ToString();
+            
+            WebClient webclient = new WebClient();
+            Stream stream = webclient.OpenRead("https://raw.githubusercontent.com/grzybeek/YMTEditor/master/YMTEditor/version.txt");
+            StreamReader reader = new StreamReader(stream);
+
+            string githubVersion = reader.ReadToEnd().ToString();
+
+            if(version != githubVersion)
+            {
+                MessageBoxResult result = MessageBox.Show(this, "There is new version of YMTEditor available!\nYour version: " + version + "\nAvailable version: " + githubVersion + " \n\nDo you want to download it now?\n\nClick YES to open website and close editor\nClick NO to open editor", "New version available!", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                if (result == MessageBoxResult.Yes)
+                {
+                    //probably better would be auto-updater but idk how to do it yet
+                    Process.Start("https://github.com/grzybeek/YMTEditor/releases");
+                    Environment.Exit(0);
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                    //open editor
+                }
+            }
+            else
+            {
+                //good version, open editor
+            }
         }
     }
 }

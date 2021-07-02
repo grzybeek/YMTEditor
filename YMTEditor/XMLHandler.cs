@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -29,7 +30,7 @@ namespace YMTEditor
                 //loading *.ymt
                 xmlFile = XDocument.Parse(filePath);
             }
-            
+
             string usedPath = filePath;
             CPedVariationInfo = xmlFile.Element("CPedVariationInfo").FirstAttribute != null
                 ? xmlFile.Element("CPedVariationInfo").FirstAttribute.Value.ToString()
@@ -44,15 +45,38 @@ namespace YMTEditor
             //generate used components
             foreach (var node in xmlFile.Descendants("availComp"))
             {
+                
                 var availComponents = node.Value.Split(' '); //split on space
+
+                if(availComponents[0].Length > 3)// that means we have weird availComp from metatool, for example: "00010203FF04FF...."
+                {
+                    string s = availComponents[0].ToString();
+                    List<String> temp = new List<String>();
+                    int availlength = availComponents[0].Length;
+                    int skipEvery = 2; //we have to split every 2 characters
+                    for (int i = 0; i < availlength; i += skipEvery)
+                    {
+                        string a = s.Substring(i, skipEvery).Substring(1);
+                        
+                        if(a == "F")
+                        {
+                            a = "255";
+                        }
+
+                        temp.Add(a);
+                    }
+
+                    availComponents = temp.ToArray();
+
+                }
                 int compId = 0; //components id's
                 int compIndex = 0; //order of our components in ymt
-                foreach(var comp in availComponents)
+                foreach (var comp in availComponents)
                 {
-                    if(comp != "255")
+                    if (comp != "255")
                     {
                         string _name = Enum.GetName(typeof(YMTTypes.ComponentNumbers), compId);
-                        ComponentData componentName = new ComponentData(_name, compId, compIndex, new ObservableCollection<ComponentDrawable>()) { compHeader = _name.ToUpper()};
+                        ComponentData componentName = new ComponentData(_name, compId, compIndex, new ObservableCollection<ComponentDrawable>()) { compHeader = _name.ToUpper() };
                         MainWindow.Components.Add(componentName);
 
                         MenuItem item = (MenuItem)MainWindow._componentsMenu.FindName(_name);
@@ -70,7 +94,7 @@ namespace YMTEditor
                 foreach (var prop in xmlFile.Descendants("aPropMetaData").Elements("Item"))
                 {
                     int p_anchorId = Convert.ToInt32(prop.Element("anchorId").FirstAttribute.Value);
-                    
+
                     if (oldId != p_anchorId)
                     {
                         string _name = Enum.GetName(typeof(YMTTypes.PropNumbers), p_anchorId);
@@ -87,7 +111,13 @@ namespace YMTEditor
             //read components
             int compItemIndex = 0; //order of our components in ymt
             foreach (var node in xmlFile.Descendants("aComponentData3").Elements("Item"))
-            {
+            {  
+                if (compItemIndex >= MainWindow.Components.Count())
+                {
+                    //some ymt's have more <Item>'s in component section than defined in <availComp>, for example freemode male_heist or bikerdlc
+                    //so just skip more than in availComp
+                    return;
+                }
                 ComponentData _curComp = MainWindow.Components.ElementAt(compItemIndex); //current component (jbib/lowr/teef etc)
                 int _curCompDrawablesCount = 0; //count how many component has variations (000, 001, 002, etc)
                 int _curCompAvailTex = 0; // not used by game probably, total amount of textures component has (numAvailTex)
@@ -126,7 +156,31 @@ namespace YMTEditor
             {
                 string comphash_2FD08CEF = compInfo_node.Element("hash_2FD08CEF").Value.ToString(); //unknown usage
                 string comphash_FC507D28 = compInfo_node.Element("hash_FC507D28").Value.ToString(); //unknown usage
-                string[] comphash_07AE529D = compInfo_node.Element("hash_07AE529D").Value.Split(' '); //probably expressionMods(?) - used for heels for example
+
+                string[] comphash_07AE529D = null; //probably expressionMods(?) - used for heels for example
+                if (compInfo_node.Element("hash_07AE529D").Value.Length == 9) //normal "0 0 0 0 0"
+                {
+                    comphash_07AE529D = compInfo_node.Element("hash_07AE529D").Value.Split(' ');
+                }
+                else if(compInfo_node.Element("hash_07AE529D").Value.Length == 10)//that means, we have weird metatool value "0000000000" without spaces
+                {
+                    string s = compInfo_node.Element("hash_07AE529D").Value.ToString();
+                    List<String> temp = new List<String>();
+                    int stringlenght = s.Length;
+                    int skipEvery = 2; //we have to split every 2 characters
+                    for (int i = 0; i < stringlenght; i += skipEvery)
+                    {
+                        string a = s.Substring(i, skipEvery).Substring(1);
+                        temp.Add(a);
+                    }
+
+                    comphash_07AE529D = temp.ToArray();
+                }
+                else //maybe there is other case and i don't about it, then just input zeros
+                {
+                    comphash_07AE529D = new string[] { "0", "0", "0", "0", "0" };
+                }
+
                 int compflags = Convert.ToInt32(compInfo_node.Element("flags").FirstAttribute.Value); //unknown usage
                 string compinclusions = compInfo_node.Element("inclusions").Value.ToString(); //unknown usage
                 string compexclusions = compInfo_node.Element("exclusions").Value.ToString(); //unknown usage
@@ -138,9 +192,9 @@ namespace YMTEditor
 
                 string _name = Enum.GetName(typeof(YMTTypes.ComponentNumbers), comphash_D12F579D);
                 int curCompIndex = ComponentData.GetComponentIndexByID(comphash_D12F579D);
-                if(curCompIndex != -1)
+                if (curCompIndex != -1)
                 {
-                    MainWindow.Components.ElementAt(curCompIndex).compList.ElementAt(comphash_FA1F27BF).drawableInfo.Add(new ComponentInfo(comphash_2FD08CEF, comphash_FC507D28, 
+                    MainWindow.Components.ElementAt(curCompIndex).compList.ElementAt(comphash_FA1F27BF).drawableInfo.Add(new ComponentInfo(comphash_2FD08CEF, comphash_FC507D28,
                         comphash_07AE529D, compflags, compinclusions, compexclusions, comphash_6032815C, comphash_7E103C8B, comphash_D12F579D, comphash_FA1F27BF));
                 }
             }
@@ -171,9 +225,9 @@ namespace YMTEditor
                     }
 
                     PropData _curPropData = MainWindow.Props.Where(p => p.propId == p_anchorId).First();
-                    
+
                     PropDrawable _curPropDrawable = new PropDrawable(_curPropDrawableIndex, p_audioId, p_expressionMods, new ObservableCollection<PropTexture>(), p_renderFlag, p_propFlag, p_flag, p_anchorId, p_propId, p_hash);
-                    
+
                     int texturePropIndex = 0;
                     foreach (var texData in propMetaData.Descendants("texData").Elements("Item"))
                     {
@@ -195,8 +249,11 @@ namespace YMTEditor
                     _curPropDrawableIndex++;
                     oldPropId = p_anchorId;
                 }
-                
+
             }
+
+
+            
         }
 
         private static XElement XML_Schema(string filePath)
