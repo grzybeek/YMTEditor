@@ -1,7 +1,8 @@
-# YMTEditor [WIP]
+# YMTEditor
 ## Used to edit *.ymt OR *.ymt.xml - (Peds clothes) files
 ### Using [Codewalker.Core](https://github.com/dexyfex/CodeWalker) by @dexyfex
 ### Download YMTEditor [here](https://github.com/grzybeek/YMTEditor/releases) ###
+### [Tutorial](https://forum.cfx.re/t/how-to-stream-clothes-and-props-as-addons-for-mp-freemode-models/3345474) ###
 
 
 #### How it works: ####
