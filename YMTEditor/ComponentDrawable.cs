@@ -21,12 +21,36 @@ namespace YMTEditor
             }
         }
         public int drawableTextureCount { get; set; }
-        public int drawablePropMask { get; set; }
+
+        private int _drawablePropMask;
+        public int drawablePropMask
+        {
+            get { return _drawablePropMask; }
+            set
+            {
+                _drawablePropMask = value;
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("drawablePropMask"));
+            }
+        }
+
         public int drawableAlternatives { get; set; }
         public bool drawableHasCloth { get; set; }
 
         public ObservableCollection<ComponentTexture> drawableTextures { get; set; }
         public ObservableCollection<ComponentInfo> drawableInfo { get; set; }
+
+        private int _dTexturesTexId;
+        public int dTexturesTexId
+        {
+            get { return _dTexturesTexId; }
+            set
+            {
+                _dTexturesTexId = value;
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("dTexturesTexId"));
+            }
+        }
 
         public ComponentDrawable(int index, int txtCount, int propMask, int numAlternatives, bool hasCloth, ObservableCollection<ComponentTexture> textureList, ObservableCollection<ComponentInfo> infoList)
         {

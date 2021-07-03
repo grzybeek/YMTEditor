@@ -53,6 +53,21 @@
             <MenuItem Header="_Options">
                 <MenuItem Name="RemovingAskCheck" Click="RemovingAsk_Click" Header="Ask on removing" IsCheckable="True" StaysOpenOnClick="True"></MenuItem>
             </MenuItem>
+
+            <MenuItem Header="_Help">
+                <MenuItem Name="tutorial" Click="HelpBtn_Click" Header="Tutorial"></MenuItem>
+                <Separator/>
+                <MenuItem Name="help" Click="HelpBtn_Click" Header="Help"></MenuItem>
+                <MenuItem Name="components" Click="HelpBtn_Click" Header="Components"></MenuItem>
+                <MenuItem Name="props" Click="HelpBtn_Click" Header="Props"></MenuItem>
+                <MenuItem Name="propmask" Click="HelpBtn_Click" Header="propMask"></MenuItem>
+                <MenuItem Name="compproperties" Click="HelpBtn_Click" Header="Component properties"></MenuItem>
+                <MenuItem Name="propproperties" Click="HelpBtn_Click" Header="Prop properties"></MenuItem>
+                <Separator/>
+                <MenuItem Name="contact" Click="HelpBtn_Click" Header="Contact info"></MenuItem>
+                <Separator/>
+                <MenuItem Name="version" IsEnabled="False"  Header="Current version: x.x"></MenuItem>
+            </MenuItem>
         </Menu>
 
         <StatusBar DockPanel.Dock="Bottom">
@@ -166,10 +181,27 @@
                                                                                             <Grid Grid.Row="0" Margin="0, 5, 0, 5">
                                                                                                 <Grid.ColumnDefinitions>
                                                                                                     <ColumnDefinition Width="*"/>
+                                                                                                    <ColumnDefinition Width="auto"/>
                                                                                                     <ColumnDefinition Width="*"/>
                                                                                                 </Grid.ColumnDefinitions>
                                                                                                 <Button Grid.Column="0" HorizontalAlignment="Left" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" +1 texture " Click="Button_Click_AddComponent"></Button>
-                                                                                                <Button Grid.Column="1" HorizontalAlignment="Right" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" -1 texture " Click="Button_Click_RemoveComponent"></Button>
+                                                                                                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                                                                                                    <TextBlock ToolTip="Don't edit texID Value if you don't know what are you doing!" Text="texID Value: "></TextBlock>
+                                                                                                    <ComboBox Name="TXTCombo" DropDownClosed="TXTCombo_DropDownClosed" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" SelectedIndex="{Binding dTexturesTexId}" Width="80" SelectedValuePath="Content">
+                                                                                                        <ComboBoxItem Content="0 (_uni)" />
+                                                                                                        <ComboBoxItem Content="1 (_whi)" />
+                                                                                                        <ComboBoxItem Content="2 (_bla)" />
+                                                                                                        <ComboBoxItem Content="3 (_chi)" />
+                                                                                                        <ComboBoxItem Content="4 (_lat)" />
+                                                                                                        <ComboBoxItem Content="5 (_ara)" />
+                                                                                                        <ComboBoxItem Content="6 (_bal)" />
+                                                                                                        <ComboBoxItem Content="7 (_jam)" />
+                                                                                                        <ComboBoxItem Content="8 (_kor)" />
+                                                                                                        <ComboBoxItem Content="9 (_ita)" />
+                                                                                                        <ComboBoxItem Content="10 (_pak)" />
+                                                                                                    </ComboBox>
+                                                                                                </StackPanel>
+                                                                                                <Button Grid.Column="2" HorizontalAlignment="Right" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" Width="auto" Height="auto" Content=" -1 texture " Click="Button_Click_RemoveComponent"></Button>
                                                                                             </Grid>
                                                                                             <ItemsControl Grid.Row="1" ItemsSource="{Binding drawableTextures}">
                                                                                                 <ItemsControl.ItemTemplate>

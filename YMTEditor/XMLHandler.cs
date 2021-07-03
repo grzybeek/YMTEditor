@@ -142,6 +142,7 @@ namespace YMTEditor
                     foreach (var texture_node in drawable_node.Descendants("aTexData").Elements("Item"))
                     {
                         string texId = texture_node.Element("texId").FirstAttribute.Value;
+                        _curDrawable.dTexturesTexId = Convert.ToInt32(texId);//used to set proper dropdown value
                         string texLetter = Number2String(textureIndex, false);
                         _curDrawable.drawableTextures.Add(new ComponentTexture(texLetter, texId));
                         textureIndex++;
@@ -252,8 +253,6 @@ namespace YMTEditor
 
             }
 
-
-            
         }
 
         private static XElement XML_Schema(string filePath)
@@ -290,11 +289,11 @@ namespace YMTEditor
                     XElement TexDataIndex = new XElement("aTexData", new XAttribute("itemType", "CPVTextureData"));
                     drawblDataIndex.Add(TexDataIndex);
 
-                    for (int k = 0; k < MainWindow.Components.ElementAt(i).compList.ElementAt(j).drawableTextures.Count(); k++)
+                    foreach (var txt in MainWindow.Components.ElementAt(i).compList.ElementAt(j).drawableTextures)
                     {
                         XElement TexDataItem = new XElement("Item");
-                        int _texId = _propMask == 17 || _propMask == 19 || _propMask == 21 ? 1 : 0; // if propMask 17/19/21 -> texId = 1, otherwise texId = 0 --- there might be other values as well but those are most used
-                        TexDataItem.Add(new XElement("texId", new XAttribute("value", _texId))); //I guess it doesn't need functionality to manually edit it (?)
+                        string _texId = txt.textureTexId;
+                        TexDataItem.Add(new XElement("texId", new XAttribute("value", _texId)));
                         TexDataItem.Add(new XElement("distribution", new XAttribute("value", 255)));
                         TexDataIndex.Add(TexDataItem);
                     }
@@ -319,7 +318,7 @@ namespace YMTEditor
             // END -> aSelectionSets
 
             // START -> compInfos
-            XElement compInfo = new XElement("compInfos", new XAttribute("itemType", "CComponentInfo")); //not sure if game needs compInfos without any values set
+            XElement compInfo = new XElement("compInfos", new XAttribute("itemType", "CComponentInfo"));
             foreach (var c in MainWindow.Components)
             {
                 foreach (var comp in c.compList)
@@ -366,7 +365,7 @@ namespace YMTEditor
                 numAvailPropsCount += MainWindow.Props.ElementAt(i).propList.Count();
             }
 
-            XElement propInfo = new XElement("propInfo"); //TODO: implement editing props in main window, for now it will remove all props from .YMT (!)
+            XElement propInfo = new XElement("propInfo");
             propInfo.Add(new XElement("numAvailProps", new XAttribute("value", numAvailPropsCount)));
 
             XElement aPropMetaData = new XElement("aPropMetaData", new XAttribute("itemType", "CPedPropMetaData"));

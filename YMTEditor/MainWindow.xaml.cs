@@ -19,6 +19,7 @@ namespace YMTEditor
         public static MenuItem _propsMenu;
         public static MenuItem _removeAsk;
         public static TextBlock _logBar;
+        public static MenuItem _version;
 
         public static ObservableCollection<ComponentData> Components;
         public static ObservableCollection<PropData> Props;
@@ -36,6 +37,7 @@ namespace YMTEditor
             _propsMenu = (MenuItem)FindName("PropsMenu");
             _logBar = (TextBlock)FindName("logBar");
             _removeAsk = (MenuItem)FindName("RemovingAskCheck");
+            _version = (MenuItem)FindName("version");
 
             _removeAsk.IsChecked = Properties.Settings.Default.removeAsk;
             SetLogMessage("Loaded options");
@@ -614,7 +616,8 @@ namespace YMTEditor
         private void numAlternatives_Changed(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             //todo
-            SetLogMessage("numAlternatives changed to: " + e.NewValue);
+            //SetLogMessage("numAlternatives changed to: " + e.NewValue);
+            SetLogMessage("numAlternatives not implemented");
         }
 
         private void propMask_Changed(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -629,19 +632,24 @@ namespace YMTEditor
 
             ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == drawIndex).First(); //get component
             comp.drawablePropMask = _newPropMask;
-            string _newTexId = _newPropMask == 17 || _newPropMask == 19 || _newPropMask == 21 ? "1" : "0";
+            string _newTexId = _newPropMask == 17 || _newPropMask == 19 || _newPropMask == 21 || _newPropMask == 25 || _newPropMask == 27 || _newPropMask == 49 ? "1" : "0";
 
             foreach (var txt in comp.drawableTextures)
             {
                 txt.textureTexId = _newTexId;
             }
 
+            comp.dTexturesTexId = Convert.ToInt32(_newTexId); //used to set proper dropdown value
+
             switch (_newPropMask)
             {
                 case 17:
                 case 19:
                 case 21:
-                    SetLogMessage("propMask changed to: " + _newPropMask + " | Your .ydd model should end with _r, and .ytd texture with _whi");
+                case 25: // 
+                case 27: // found in some gta ymt's
+                case 49: //
+                    SetLogMessage("propMask changed to: " + _newPropMask + " | Your .ydd model should end with _r, and .ytd texture with _whi/bla/chi/lat/etc...");
                     break;
                 default:
                     SetLogMessage("propMask changed to: " + _newPropMask + " | Your .ydd model should end with _u, and .ytd texture with _uni");
@@ -656,6 +664,170 @@ namespace YMTEditor
             Properties.Settings.Default.removeAsk = (bool) value;
             Properties.Settings.Default.Save();
             SetLogMessage("Saved options, will be restored when opening the program");
+        }
+
+        private void HelpBtn_Click(object sender, RoutedEventArgs e)
+        {
+            string clicked_btn = (sender as MenuItem).Name;
+            if(clicked_btn == "tutorial")
+            {
+                Process.Start("https://forum.cfx.re/t/how-to-stream-clothes-and-props-as-addons-for-mp-freemode-models/3345474");
+            }
+            else if(clicked_btn == "help")
+            {
+                string text = "Small explanation of how everything works, check other buttons for better explanation:\n\n\n" +
+                    "Component = Each have own number and \"slot\" on our ped, it requires skinning/rigging. (head, berd, hair, uppr, lowr, hand, feet, teef, accs, task, decl, jbib)\n\n" +
+                    "Prop = Each have own number and \"slot\" on our ped model, it doesn't need skinning/rigging. (p_head, p_eyes, p_ears, p_lwrist, p_rwrist)\n\n" +
+                    "Drawable = Each .ydd file is different drawable, each have different number starting at 000, up to 127 (not sure about max number)\n\n" +
+                    "Texture = Each .ytd file is a texture, one drawable can have up to 26 textures (a-z)\n\n" +
+                    "propMask = Determines if our skin should be _u or _r - what is that is explained later\n\n" +
+                    "texture texId = it defines 'race' for our skin\n\n" +
+                    "numAlternatives = it defines how much alternate models our drawable use (it has _1 _2 _3 etc. after _u/_r in name - requires alternatevariations.meta file to work)\n\n" +
+                    "clothData = true/false if our drawable is using .yld file - mostly false\n\n" +
+                    "Component/prop properties explained in other buttons";
+
+                MessageBox.Show(text, "General help", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
+            else if(clicked_btn == "components")
+            {
+                string text =
+                    "Components:\n" +
+                    "0 - head (head models)\n" +
+                    "1 - berd (masks, beards)\n" +
+                    "2 - hair (hair models)\n" +
+                    "3 - uppr (torso, body, arms)\n" +
+                    "4 - lowr (pants, legs)\n" +
+                    "5 - hand (backpacks, bags)\n" +
+                    "6 - feet (feets, shoes)\n" +
+                    "7 - teef (tie, scarf, necklace)\n" +
+                    "8 - accs (inner top models, under t-shirt, etc)\n" +
+                    "9 - task (vests)\n" +
+                    "10 - decl (stickers, decals)\n" +
+                    "11 - jbib (outer top models, hoodies, above t-shirt, etc)\n\n" +
+                    "Component suffix (_u or _r): \n" +
+                    "To set your model _u or _r, you have to change propMask value, check other help button for it\n" +
+                    "_u = universal\n" +
+                    "_r = race\n\n" +
+                    "Component textures: \n" +
+                    "If your model is _u, you have to use suffix _uni in your texture name\n" +
+                    "If your model is _r, you have to use suffix _whi/bla/chi/etc... in your texture name\n\n" +
+                    "texId values: \n" +
+                    "0 = _uni (universal) \n" +
+                    "1 = _whi (white) \n" +
+                    "2 = _bla (black) \n" +
+                    "3 = _chi (chinese) \n" +
+                    "4 = _lat (latino) \n" +
+                    "5 = _ara (arabic) \n" +
+                    "6 = _bal (baltic) \n" +
+                    "7 = _jam (jamaican) \n" +
+                    "8 = _kor (korean) \n" +
+                    "9 = _ita (italian) \n" +
+                    "10 = _pak (pakistani - resembles indians mostly, like shopkeepers) \n" +
+                    "";
+                   
+                MessageBox.Show(text, "Components help", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
+            else if(clicked_btn == "props")
+            {
+                string text =
+                    "Props - there are more known, but game only uses these: \n" +
+                    "0 - p_head (hats)\n" +
+                    "1 - p_eyes (glasses)\n" +
+                    "2 - p_ears (earrings)\n" +
+                    "6 - p_lwrist (watches, bracelets on left wrist)\n" +
+                    "7 - p_rwrist (watches, bracelets on right wrist)\n";
+
+                MessageBox.Show(text, "Props help", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
+            else if(clicked_btn == "propmask")
+            {
+                string text =
+                    "To set your model _u or _r you have to change propMask value: \n\n" +
+                    "propMask values for _r: 17, 19, 21, 25, 27, 49\n" +
+                    "and there might be more, usage of different numbers is not known.\n\n" +
+                    "Simply for _u use anything else, most common is value: 1\n\n\n" +
+
+                    "If you are using _r, your .ydd model should contain skin/body\n";
+
+
+                MessageBox.Show(text, "Propmask help", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
+            else if (clicked_btn == "compproperties")
+            {
+                string text =
+                    "hash_2FD08CEF - usage unknown, something related to audio (game.dat151.rel file) \n\n" +
+                    "hash_FC507D28 - usage unknown \n\n" +
+                    "hash_07AE529D - expressionMods(?) - used to make heels for example - currently disabled in editor because i don't know how to do it well :( \n\n" +
+                    "flags - i don't know usage of it :( \n\n" +
+                    "inclusions - i don't know usage of it :( \n\n" +
+                    "exclusions - i don't know usage of it :( \n\n" +
+                    "hash_6032815C - usage unknown, it's always PV_COMP_HEAD i think, so it's disabled in editor \n\n" +
+                    "hash_7E103C8B - usage unknown\n\n\n" +
+
+                    "If you know what something of these do, please contact me!\n";
+
+
+                MessageBox.Show(text, "Component properties help", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
+            else if (clicked_btn == "propproperties")
+            {
+                string text =
+                    "AudioId - something related to audio, as name says, idk much about it \n\n" +
+                    "ExpressionMods - used to hats hide hair for example - it requires more files than only this value - currently disabled in editor because i don't know how to do it well :( \n\n" +
+                    "RenderFlags - i don't know usage of it :( \n\n" +
+                    "PropFlags - i don't know usage of it :( \n\n" +
+                    "Flags - i don't know usage of it :( \n\n" +
+                    "hash_AC887A91 - i don't know usage of it :( \n\n" +
+
+                    "If you know what something of these do, please contact me!\n";
+
+
+                MessageBox.Show(text, "Prop properties help", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
+            else if(clicked_btn == "contact")
+            {
+                string text =
+                    "You can find me here: \n\n" +
+                    "Github - grzybeek \n" +
+                    "Discord acc - grzybeek#9100 \n" +
+                    "Discord server - discord.gg/txjjzdr \n" +
+                    "forum.cfx.re acc - grzybeek\n";
+
+                MessageBox.Show(text, "Contact info", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
+        }
+
+        private void TXTCombo_DropDownClosed(object sender, EventArgs e)
+        {
+            ComboBox cmb = (ComboBox)sender;
+            if(cmb.SelectedItem != null)
+            {
+                string btn = Convert.ToString((sender as ComboBox).DataContext);
+                string[] btn_parts = btn.Split((char)32);
+                int index = Convert.ToInt32(btn_parts[0]); //index 000, 001, 002 etc
+
+                string compName = (string)(sender as FrameworkElement).Tag; //name jbib, lowr, hand etc
+                int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), compName.ToLower());
+                int _index = Convert.ToInt32(Components.Where(z => z.compId == enumNumber).First().compIndex);
+
+                string val = (string) cmb.SelectedValue.ToString().Substring(0,1); //selected option from combobox, only number
+
+                ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == index).First(); //get component
+
+                foreach (var txt in comp.drawableTextures)
+                {
+                    txt.textureTexId = val;
+                }
+
+                if(Convert.ToInt32(val) >= 1) //if we change dropdown menu with texid, update propmask also
+                {
+                    comp.drawablePropMask = 17; //_r _whi/bla/chi/lat/etc propmask
+                }
+                else
+                {
+                    comp.drawablePropMask = 1; //_u _uni propmask
+                }
+            }
         }
 
         private void ClearEverything()
@@ -674,8 +846,7 @@ namespace YMTEditor
             }
 
             Components.Clear();
-            Props.Clear();
-            
+            Props.Clear(); 
         }
 
         //version compare taken and edited from https://github.com/smallo92/Ymap-YbnMover/blob/master/ymapmover/Startup.cs
@@ -684,7 +855,8 @@ namespace YMTEditor
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fvi.FileVersion.ToString();
-            
+            _version.Header = "Current version: " + version;
+
             WebClient webclient = new WebClient();
             Stream stream = webclient.OpenRead("https://raw.githubusercontent.com/grzybeek/YMTEditor/master/YMTEditor/version.txt");
             StreamReader reader = new StreamReader(stream);
@@ -710,5 +882,7 @@ namespace YMTEditor
                 //good version, open editor
             }
         }
+
+        
     }
 }
