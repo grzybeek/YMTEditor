@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace YMTEditor
@@ -41,6 +42,7 @@ namespace YMTEditor
             bHasLowLODs = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bHasLowLODs").First().FirstAttribute.Value);
             bIsSuperLOD = Convert.ToBoolean(xmlFile.Elements("CPedVariationInfo").Elements("bIsSuperLOD").First().FirstAttribute.Value);
             dlcName = xmlFile.Elements("CPedVariationInfo").Elements("dlcName").First().Value.ToString();
+            MainWindow.dlcName = CPedVariationInfo;
 
             //generate used components
             foreach (var node in xmlFile.Descendants("availComp"))
@@ -177,9 +179,9 @@ namespace YMTEditor
 
                     comphash_07AE529D = temp.ToArray();
                 }
-                else //maybe there is other case and i don't about it, then just input zeros
+                else //maybe there is other case and i don't about it, then split by space
                 {
-                    comphash_07AE529D = new string[] { "0", "0", "0", "0", "0" };
+                    comphash_07AE529D = compInfo_node.Element("hash_07AE529D").Value.Split(' ');
                 }
 
                 int compflags = Convert.ToInt32(compInfo_node.Element("flags").FirstAttribute.Value); //unknown usage
@@ -195,8 +197,18 @@ namespace YMTEditor
                 int curCompIndex = ComponentData.GetComponentIndexByID(comphash_D12F579D);
                 if (curCompIndex != -1)
                 {
-                    MainWindow.Components.ElementAt(curCompIndex).compList.ElementAt(comphash_FA1F27BF).drawableInfo.Add(new ComponentInfo(comphash_2FD08CEF, comphash_FC507D28,
-                        comphash_07AE529D, compflags, compinclusions, compexclusions, comphash_6032815C, comphash_7E103C8B, comphash_D12F579D, comphash_FA1F27BF));
+                    // FA1F28BF can have bigger value (in compInfo section) than there is defined drawables in component, so don't add more than exists
+                    if (MainWindow.Components.ElementAt(curCompIndex).compList.Count() > comphash_FA1F27BF)
+                    {
+                        //some weird ymt's can have multiple compInfo properties for one drawable, so let's add only first one
+                        if(MainWindow.Components.ElementAt(curCompIndex).compList.ElementAt(comphash_FA1F27BF).drawableInfo.Count() == 0)
+                        {
+                            MainWindow.Components.ElementAt(curCompIndex).compList.ElementAt(comphash_FA1F27BF).drawableInfo.Add(new ComponentInfo(comphash_2FD08CEF, comphash_FC507D28,
+                                comphash_07AE529D, compflags, compinclusions, compexclusions, comphash_6032815C, comphash_7E103C8B, comphash_D12F579D, comphash_FA1F27BF));
+                        }
+                        
+                    }
+                    
                 }
             }
 
@@ -209,7 +221,30 @@ namespace YMTEditor
                 {
 
                     string p_audioId = propMetaData.Element("audioId").Value.ToString();
-                    string[] p_expressionMods = propMetaData.Element("expressionMods").Value.Split(' '); //split on space
+
+                    string[] p_expressionMods = null;
+                    if (propMetaData.Element("expressionMods").Value.Length == 9) //normal "0 0 0 0 0"
+                    {
+                        p_expressionMods = propMetaData.Element("expressionMods").Value.Split(' ');//split on space
+                    }
+                    else if (propMetaData.Element("expressionMods").Value.Length == 10)//that means, we have weird metatool value "0000000000" without spaces
+                    {
+                        string s = propMetaData.Element("expressionMods").Value.ToString();
+                        List<String> temp = new List<String>();
+                        int stringlenght = s.Length;
+                        int skipEvery = 2; //we have to split every 2 characters
+                        for (int i = 0; i < stringlenght; i += skipEvery)
+                        {
+                            string a = s.Substring(i, skipEvery).Substring(1);
+                            temp.Add(a);
+                        }
+
+                        p_expressionMods = temp.ToArray();
+                    }
+                    else //maybe there is other case and i don't about it, then just split by space
+                    {
+                        p_expressionMods = propMetaData.Element("expressionMods").Value.Split(' ');
+                    }
 
                     string p_renderFlag = propMetaData.Element("renderFlags").Value.ToString();
                     int p_propFlag = Convert.ToInt32(propMetaData.Element("propFlags").FirstAttribute.Value);
@@ -217,8 +252,6 @@ namespace YMTEditor
                     int p_anchorId = Convert.ToInt32(propMetaData.Element("anchorId").FirstAttribute.Value);
                     int p_propId = Convert.ToInt32(propMetaData.Element("propId").FirstAttribute.Value);
                     int p_hash = Convert.ToInt32(propMetaData.Element("hash_AC887A91").FirstAttribute.Value);
-
-                    string _name = Enum.GetName(typeof(YMTTypes.PropNumbers), p_anchorId);
 
                     if (oldPropId != p_anchorId)//reset index on new anchor
                     {
@@ -255,7 +288,7 @@ namespace YMTEditor
 
         }
 
-        private static XElement XML_Schema(string filePath)
+        private static XElement YMTXML_Schema(string filePath)
         {
             // TOP OF FILE || START -> CPedVariationInfo
             XElement xml = CPedVariationInfo != ""
@@ -389,7 +422,17 @@ namespace YMTEditor
                         texData.Add(texDataItem);
                     }
                     aPropMetaDataItem.Add(texData);
-                    aPropMetaDataItem.Add(new XElement("renderFlags", prop.propRenderFlags));
+
+                    //check if there is renderFlags set, if not save it as "<renderFlags />" - earlier it was "<renderFlags></renderFlags>"
+                    if(prop.propRenderFlags.Length > 0)
+                    {
+                        aPropMetaDataItem.Add(new XElement("renderFlags", prop.propRenderFlags));
+                    }
+                    else
+                    {
+                        aPropMetaDataItem.Add(new XElement("renderFlags"));
+                    }
+
                     aPropMetaDataItem.Add(new XElement("propFlags", new XAttribute("value", prop.propPropFlags)));
                     aPropMetaDataItem.Add(new XElement("flags", new XAttribute("value", prop.propFlags)));
                     aPropMetaDataItem.Add(new XElement("anchorId", new XAttribute("value", prop.propAnchorId)));
@@ -411,7 +454,19 @@ namespace YMTEditor
                 }
                 aAnchorsItem.Add(new XElement("props", String.Join(" ", props)));
 
-                aAnchorsItem.Add(new XElement("anchor", "ANCHOR_" + p.propHeader.Substring(2)));
+                string pname = p.propHeader.Substring(2);
+                switch (pname.Substring(0, 1))
+                {
+                    case "L":
+                        aAnchorsItem.Add(new XElement("anchor", "ANCHOR_LEFT_" + pname.Substring(1)));
+                        break;
+                    case "R":
+                        aAnchorsItem.Add(new XElement("anchor", "ANCHOR_RIGHT_" + pname.Substring(1)));
+                        break;
+                    default:
+                        aAnchorsItem.Add(new XElement("anchor", "ANCHOR_" + pname));
+                        break;
+                }
 
                 aAnchors.Add(aAnchorsItem);
             }
@@ -432,19 +487,98 @@ namespace YMTEditor
 
         public static void SaveXML(string filePath)
         {
-            XElement xmlFile = XML_Schema(filePath);
+            XElement xmlFile = YMTXML_Schema(filePath);
             xmlFile.Save(filePath);
             MessageBox.Show("Saved to: " + filePath, "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        public static System.Xml.XmlDocument SaveYMT(string filePath)
+        public static XmlDocument SaveYMT(string filePath)
         {
-            XElement xmlFile = XML_Schema(filePath);
+            XElement xmlFile = YMTXML_Schema(filePath);
             xmlFile.Save(filePath);
 
             //create XmlDocument from XElement (codewalker.core requires XmlDocument)
-            var xmldoc = new System.Xml.XmlDocument();
+            var xmldoc = new XmlDocument();
             xmldoc.Load(xmlFile.CreateReader());
+
+            MessageBox.Show("Saved to: " + filePath, "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+            return xmldoc;
+        }
+
+        private static XElement Creature_Schema(string filePath)
+        {
+            XElement xml = new XElement("CCreatureMetaData");
+
+            XElement pedCompExpressions = new XElement("pedCompExpressions");
+            if(MainWindow.Components.Where(c => c.compId == 6).Count() > 0)
+            {
+                //heels doesn't have that first entry but without it, fivem was sometimes crashing(?)
+                XElement FirstpedCompItem = new XElement("Item");
+                FirstpedCompItem.Add(new XElement("pedCompID", new XAttribute("value", 6)));
+                FirstpedCompItem.Add(new XElement("pedCompVarIndex", new XAttribute("value", -1)));
+                FirstpedCompItem.Add(new XElement("pedCompExpressionIndex", new XAttribute("value", 4)));
+                FirstpedCompItem.Add(new XElement("tracks", 33));
+                FirstpedCompItem.Add(new XElement("ids", 28462));
+                FirstpedCompItem.Add(new XElement("types", 2));
+                FirstpedCompItem.Add(new XElement("components", 1));
+                pedCompExpressions.Add(FirstpedCompItem);
+
+                foreach (var comp in MainWindow.Components.Where(c => c.compId == 6).First().compList)
+                {
+                    XElement pedCompItem = new XElement("Item");
+                    pedCompItem.Add(new XElement("pedCompID", new XAttribute("value", 6)));
+                    pedCompItem.Add(new XElement("pedCompVarIndex", new XAttribute("value", comp.drawableIndex)));
+                    pedCompItem.Add(new XElement("pedCompExpressionIndex", new XAttribute("value", 4)));
+                    pedCompItem.Add(new XElement("tracks", 33));
+                    pedCompItem.Add(new XElement("ids", 28462));
+                    pedCompItem.Add(new XElement("types", 2));
+                    pedCompItem.Add(new XElement("components", 1));
+                    pedCompExpressions.Add(pedCompItem);
+
+                }
+            }
+            xml.Add(pedCompExpressions);
+
+            XElement pedPropExpressions = new XElement("pedPropExpressions");
+            if(MainWindow.Props.Where(p => p.propId == 0).Count() > 0)
+            {
+                //all original GTA have that one first entry, without it, fivem was sometimes crashing(?)
+                XElement FirstpedPropItem = new XElement("Item");
+                FirstpedPropItem.Add(new XElement("pedPropID", new XAttribute("value", 0)));
+                FirstpedPropItem.Add(new XElement("pedPropVarIndex", new XAttribute("value", -1)));
+                FirstpedPropItem.Add(new XElement("pedPropExpressionIndex", new XAttribute("value", 0)));
+                FirstpedPropItem.Add(new XElement("tracks", new XAttribute("content", "char_array"), 33));
+                FirstpedPropItem.Add(new XElement("ids", 13201));
+                FirstpedPropItem.Add(new XElement("types", 2));
+                FirstpedPropItem.Add(new XElement("components", 1));
+                pedPropExpressions.Add(FirstpedPropItem);
+
+                foreach (var prop in MainWindow.Props.Where(p => p.propId == 0).First().propList)
+                {
+                    XElement pedPropItem = new XElement("Item");
+                    pedPropItem.Add(new XElement("pedPropID", new XAttribute("value", 0)));
+                    pedPropItem.Add(new XElement("pedPropVarIndex", new XAttribute("value", prop.propIndex)));
+                    pedPropItem.Add(new XElement("pedPropExpressionIndex", new XAttribute("value", 0)));
+                    pedPropItem.Add(new XElement("tracks", new XAttribute("content", "char_array"), 33));
+                    pedPropItem.Add(new XElement("ids", 13201));
+                    pedPropItem.Add(new XElement("types", 2));
+                    pedPropItem.Add(new XElement("components", 1));
+                    pedPropExpressions.Add(pedPropItem);
+                }
+            }
+            xml.Add(pedPropExpressions);
+
+            return xml;
+        }
+
+        public static XmlDocument SaveCreature(string filePath)
+        {
+            XElement CreatureFile = Creature_Schema(filePath);
+            CreatureFile.Save(filePath);
+
+            //create XmlDocument from XElement
+            var xmldoc = new XmlDocument();
+            xmldoc.Load(CreatureFile.CreateReader());
 
             MessageBox.Show("Saved to: " + filePath, "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
             return xmldoc;

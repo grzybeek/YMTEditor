@@ -48,16 +48,6 @@ namespace YMTEditor
 
         }
 
-        public string expressionModsFormatted
-        {
-            get { return string.Join(", ", propExpressionMods); }
-            set
-            {
-                propExpressionMods = expressionModsFormatted.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
-                //idk, can't get it working to save :(
-            }
-        }
-
         public int propTextureCount
         {
             get { return propTextureList.Count(); }

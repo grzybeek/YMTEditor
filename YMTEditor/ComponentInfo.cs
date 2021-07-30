@@ -30,15 +30,5 @@ namespace YMTEditor
             infoHash_D12F579D = hash_D12F579D;
             infoHash_FA1F27BF = hash_FA1F27BF;
         }
-
-        public string infoHash_07AE529D_Formatted
-        {
-            get { return string.Join(", ", infoHash_07AE529D); }
-            set
-            {
-                infoHash_07AE529D = infoHash_07AE529D_Formatted.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
-                //idk, can't get it working to save :(
-            }
-        }
     }
 }

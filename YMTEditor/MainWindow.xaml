@@ -18,7 +18,7 @@
                 <MenuItem Header="_Open (XML)" Click="OpenXML_Click"/>
                 <MenuItem Header="_Save (XML)" Click="SaveXML_Click" />
                 <Separator />
-                <MenuItem Header="_Exit" IsEnabled="False" />
+                <MenuItem Name="CreatureGen" Header="_Generate CreatureMetadata" Click="GenerateCreature_Click" IsEnabled="False" />
             </MenuItem>
             <MenuItem Name="ComponentsMenu" Header="_Components" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Open XML/YMT file to edit components" >
                 <MenuItem Name="head" Header="HEAD" Click="ComponentsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
@@ -47,15 +47,16 @@
                 <MenuItem Name="p_hip" Header="P__HIP" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
                 <MenuItem Name="p_lfoot" Header="P__LFOOT" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
                 <MenuItem Name="p_rfoot" Header="P__RFOOT" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
-                <!--<MenuItem Name="UNK_604819740" Header="UNK_604819740" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>
-                <MenuItem Name="UNK_2358626934" Header="UNK_2358626934" Click="PropsMenu_Click" IsChecked="False" IsCheckable="True" StaysOpenOnClick="true"/>-->
+                <MenuItem Name="p_ph_l_hand" Header="P__PH__L__HAND" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
+                <MenuItem Name="p_ph_r_hand" Header="P__PH__R__HAND" Click="PropsMenu_Click" IsChecked="False" IsEnabled="False" StaysOpenOnClick="true"/>
             </MenuItem>
             <MenuItem Header="_Options">
                 <MenuItem Name="RemovingAskCheck" Click="RemovingAsk_Click" Header="Ask on removing" IsCheckable="True" StaysOpenOnClick="True"></MenuItem>
             </MenuItem>
 
             <MenuItem Header="_Help">
-                <MenuItem Name="tutorial" Click="HelpBtn_Click" Header="Tutorial"></MenuItem>
+                <MenuItem Name="tutorial" Click="HelpBtn_Click" Header="Tutorial - How to do addon clothes"></MenuItem>
+                <MenuItem Name="tutorial_heels" Click="HelpBtn_Click" Header="Tutorial - How to do heels and hat"></MenuItem>
                 <Separator/>
                 <MenuItem Name="help" Click="HelpBtn_Click" Header="Help"></MenuItem>
                 <MenuItem Name="components" Click="HelpBtn_Click" Header="Components"></MenuItem>
@@ -63,6 +64,7 @@
                 <MenuItem Name="propmask" Click="HelpBtn_Click" Header="propMask"></MenuItem>
                 <MenuItem Name="compproperties" Click="HelpBtn_Click" Header="Component properties"></MenuItem>
                 <MenuItem Name="propproperties" Click="HelpBtn_Click" Header="Prop properties"></MenuItem>
+                <MenuItem Name="creaturemetadata" Click="HelpBtn_Click" Header="CreatureMetadata"></MenuItem>
                 <Separator/>
                 <MenuItem Name="contact" Click="HelpBtn_Click" Header="Contact info"></MenuItem>
                 <Separator/>
@@ -254,13 +256,21 @@
                                                                                                                         <Label Margin="5">hash__FC507D28:</Label>
                                                                                                                         <TextBox Grid.Column="1" Margin="6" Text="{Binding infoHash_FC507D28}"></TextBox>
                                                                                                                     </Grid>
-                                                                                                                    <Grid ToolTip="Currently not implemented :(">
+                                                                                                                    <Grid>
                                                                                                                         <Grid.ColumnDefinitions>
                                                                                                                             <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                                                                                                            <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                            <ColumnDefinition Width="Auto"></ColumnDefinition>
                                                                                                                         </Grid.ColumnDefinitions>
                                                                                                                         <Label Margin="5">hash__07AE529D:</Label>
-                                                                                                                        <TextBox IsEnabled="False" Grid.Column="1" Margin="6" Text="{Binding infoHash_07AE529D_Formatted}"></TextBox>
+                                                                                                                        <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="1" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding infoHash_07AE529D[0]}" />
+                                                                                                                        <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="2" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding infoHash_07AE529D[1]}" />
+                                                                                                                        <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="3" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding infoHash_07AE529D[2]}" />
+                                                                                                                        <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="4" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding infoHash_07AE529D[3]}" />
+                                                                                                                        <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="5" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding infoHash_07AE529D[4]}" />
                                                                                                                     </Grid>
                                                                                                                     <Grid>
                                                                                                                         <Grid.ColumnDefinitions>
@@ -455,21 +465,34 @@
                                                                                                                 <Label Margin="5">AudioId:</Label>
                                                                                                                 <TextBox Grid.Column="1" Margin="6" Text="{Binding propAudioId}"></TextBox>
                                                                                                             </Grid>
-                                                                                                            <Grid ToolTip="Currently not implemented :(">
+                                                                                                            <Grid>
                                                                                                                 <Grid.ColumnDefinitions>
                                                                                                                     <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                                                                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                                                                                                                 </Grid.ColumnDefinitions>
                                                                                                                 <Label Margin="5">ExpressionMods:</Label>
-                                                                                                                <TextBox IsEnabled="False" Grid.Column="1" Margin="6" Text="{Binding expressionModsFormatted}"></TextBox>
+                                                                                                                <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="1" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding propExpressionMods[0]}" />
+                                                                                                                <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="2" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding propExpressionMods[1]}" />
+                                                                                                                <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="3" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding propExpressionMods[2]}" />
+                                                                                                                <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="4" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding propExpressionMods[3]}" />
+                                                                                                                <xctk:DoubleUpDown Margin="5" FormatString="N1" Grid.Column="5" Minimum="-2" Maximum="2" MaxHeight="25" Width="50" Increment=".1" Value="{Binding propExpressionMods[4]}" />
                                                                                                             </Grid>
                                                                                                             <Grid>
                                                                                                                 <Grid.ColumnDefinitions>
                                                                                                                     <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                                                                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                                                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                                                                                                                 </Grid.ColumnDefinitions>
                                                                                                                 <Label Margin="5">RenderFlags:</Label>
-                                                                                                                <TextBox Grid.Column="1" Margin="6" Text="{Binding propRenderFlags}"></TextBox>
+                                                                                                                <ComboBox Grid.Column="1" MaxHeight="25" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=2}, Path=Header.Text, Mode=TwoWay}" SelectedValue="{Binding propRenderFlags}" Name="RenderFlagsCombo" DropDownClosed="RenderFlagsCombo_DropDownClosed" Width="200" SelectedValuePath="Content">
+                                                                                                                    <ComboBoxItem Content="" />
+                                                                                                                    <ComboBoxItem Content="PRF_ALPHA" />
+                                                                                                                    <ComboBoxItem Content="PRF_DECAL" />
+                                                                                                                    <ComboBoxItem Content="PRF_CUTOUT" />
+                                                                                                                </ComboBox>
                                                                                                             </Grid>
                                                                                                             <Grid>
                                                                                                                 <Grid.ColumnDefinitions>

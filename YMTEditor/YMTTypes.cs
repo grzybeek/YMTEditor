@@ -33,8 +33,8 @@ namespace YMTEditor
             p_hip = 8, //unused?
             p_lfoot = 9, //unused?
             p_rfoot = 10, //unused?
-            UNK_604819740 = 11, //unused?
-            UNK_2358626934 = 12 //unused?
+            p_ph_l_hand = 11, //unused? - not sure about this name
+            p_ph_r_hand = 12 //unused? - not sure about this name
         }
 
     }

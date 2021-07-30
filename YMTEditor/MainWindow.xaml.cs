@@ -20,13 +20,13 @@ namespace YMTEditor
         public static MenuItem _removeAsk;
         public static TextBlock _logBar;
         public static MenuItem _version;
+        public static MenuItem _creatureGenButton;
 
         public static ObservableCollection<ComponentData> Components;
         public static ObservableCollection<PropData> Props;
 
-        //set only with doing new .ymt
-        private string fullName; //whole name "mp_m_freemode_01_XXXXXX"
-        private string dlcName; //only XXXXX
+        public static string fullName; //whole name "mp_m_freemode_01_XXXXXX"
+        public static string dlcName; //only XXXXX
 
         public MainWindow()
         {
@@ -38,6 +38,7 @@ namespace YMTEditor
             _logBar = (TextBlock)FindName("logBar");
             _removeAsk = (MenuItem)FindName("RemovingAskCheck");
             _version = (MenuItem)FindName("version");
+            _creatureGenButton = (MenuItem)FindName("CreatureGen");
 
             _removeAsk.IsChecked = Properties.Settings.Default.removeAsk;
             SetLogMessage("Loaded options");
@@ -68,6 +69,9 @@ namespace YMTEditor
             _propsMenu.IsEnabled = true;
             _propsMenu.ToolTip = "Check/Uncheck props";
 
+            _creatureGenButton.IsEnabled = true;
+            _creatureGenButton.ToolTip = "Generate creaturemetadata file - only used with heels(FEET) and hats(P_HEAD)";
+
             SetLogMessage("Created new file");
 
             this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt";
@@ -93,6 +97,10 @@ namespace YMTEditor
                     _componentsMenu.ToolTip = "Check/Uncheck components";
                     _propsMenu.IsEnabled = true;
                     _propsMenu.ToolTip = "Check/Uncheck props";
+
+                    _creatureGenButton.IsEnabled = true;
+                    _creatureGenButton.ToolTip = "Generate creaturemetadata file - only used with heels(FEET) and hats(P_HEAD)";
+
                     SetLogMessage("Loaded XML from path: " + filename);
 
                     fullName = Path.GetFileNameWithoutExtension(filename); //removes .xml
@@ -160,6 +168,10 @@ namespace YMTEditor
                     _componentsMenu.ToolTip = "Check/Uncheck components";
                     _propsMenu.IsEnabled = true;
                     _propsMenu.ToolTip = "Check/Uncheck props";
+
+                    _creatureGenButton.IsEnabled = true;
+                    _creatureGenButton.ToolTip = "Generate creaturemetadata file - only used with heels(FEET) and hats(P_HEAD)";
+
                     SetLogMessage("Loaded YMT from path: " + filename);
 
                     fullName = Path.GetFileNameWithoutExtension(filename);
@@ -179,7 +191,7 @@ namespace YMTEditor
         {
             SaveFileDialog xmlFile = new SaveFileDialog
             {
-                DefaultExt = ".ymt.xml",
+                DefaultExt = ".ymt",
                 Filter = "Peds YMT (*.ymt)|*.ymt",
                 FileName = fullName
             };
@@ -190,8 +202,7 @@ namespace YMTEditor
                 {
                     string filename = xmlFile.FileName;
                     System.Xml.XmlDocument newXml = XMLHandler.SaveYMT(filename);
-
-                    PedFile ymt = new PedFile();
+                    
                     Meta meta = XmlMeta.GetMeta(newXml);
                     byte[] newYmtBytes = ResourceBuilder.Build(meta, 2);
 
@@ -205,6 +216,44 @@ namespace YMTEditor
                     MessageBox.Show("Failed to save YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include YMT you tried to save!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             
+            }
+        }
+
+        private void GenerateCreature_Click(object sender, RoutedEventArgs e)
+        {
+            if(Components.Where(c => c.compId == 6).Count() > 0 || (Props.Where(p => p.propId == 0).Count() > 0))
+            {
+                SaveFileDialog CreatureMetadataFile = new SaveFileDialog
+                {
+                    DefaultExt = ".ymt",
+                    Filter = "CreatureMetadata YMT (*.ymt)|*.ymt",
+                    FileName = "mp_creaturemetadata_" + (dlcName.Length > 0 ? dlcName : fullName)
+                };
+                bool? result = CreatureMetadataFile.ShowDialog();
+                if (result == true)
+                {
+                    try
+                    {
+                        string filename = CreatureMetadataFile.FileName;
+                    
+                        System.Xml.XmlDocument creature = XMLHandler.SaveCreature(filename);
+                        Meta meta = XmlMeta.GetMeta(creature);
+                        byte[] newYmtBytes = ResourceBuilder.Build(meta, 2);
+
+                        File.WriteAllBytes(filename, newYmtBytes);
+
+                        SetLogMessage("Saved CreatureMetadata to path: " + filename);
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Failed to generate CreatureMetadata, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include YMT you tried to generate!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                }
+            }
+            else
+            {
+                MessageBox.Show("You need to add FEET or P_HEAD first!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -293,19 +342,9 @@ namespace YMTEditor
                 
                 int drawIndex = Props.Where(p => p.propId == _index).First().propList.Count(); //prop drawable index (000, 001, 002 etc)
 
-                //currently there is no ability to change it in window, so let's hardcode hats so it scale hair properly
-                //TODO: fix ^above^ because if someone add new addon hat which shouldn't scale down hair, it will anyway :(
-                string[] expressionMods;
-                if (propName == "P_HEAD")
-                {
-                    expressionMods = new string[] { "-0.5", "0", "0", "0", "0" }; 
-                }
-                else
-                {
-                    expressionMods = new string[] { "0", "0", "0", "0", "0" };
-                }
+                string[] expressionMods = new string[] { "0", "0", "0", "0", "0" };
 
-                //some props have renderFlag = "PRF_ALPHA", others nothing - since i don't know what it does, leave it as nothing   
+                //some props have renderFlag = "PRF_ALPHA", others nothing - since i don't know what it does, leave it as nothing - update: now it is editable and user can easily change it
                 PropDrawable _newPropDrawable = new PropDrawable(drawIndex, "none", expressionMods, new ObservableCollection<PropTexture>(), "", 0, 0, _index, drawIndex, 0);
                 _newPropDrawable.propTextureList.Add(new PropTexture("a", "0", "0", 0, 0, 0, 255));
 
@@ -531,17 +570,7 @@ namespace YMTEditor
             if (isChecked) // if true it changed from false to true, so add new component
             {
 
-                //currently there is no ability to change it in window, so let's hardcode hats so it scale hair properly
-                //TODO: fix ^above^ because if someone add new addon hat which shouldn't scale down hair, it will anyway :(
-                string[] expressionMods;
-                if (clicked_name == "P_HEAD")
-                {
-                    expressionMods = new string[] { "-0.5", "0", "0", "0", "0" };
-                }
-                else
-                {
-                    expressionMods = new string[] { "0", "0", "0", "0", "0" };
-                }
+                string[] expressionMods = new string[] { "0", "0", "0", "0", "0" };
 
                 //add first drawable(000), default compInfo, and one texture
                 PropData newProp = new PropData(clicked_name, enumNumber, new ObservableCollection<PropDrawable>()) { propHeader = clicked_name.ToUpper() };
@@ -615,9 +644,18 @@ namespace YMTEditor
 
         private void numAlternatives_Changed(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            //todo
-            //SetLogMessage("numAlternatives changed to: " + e.NewValue);
-            SetLogMessage("numAlternatives not implemented");
+            int _newNumAlternatives = (int)e.NewValue;
+
+            string compName = Convert.ToString((sender as FrameworkElement).Parent.GetValue(TagProperty)).ToLower();
+            int drawIndex = (int)(sender as FrameworkElement).Tag;
+
+            int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), compName);
+            int _index = Convert.ToInt32(Components.Where(z => z.compId == enumNumber).First().compIndex);
+
+            ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == drawIndex).First(); //get component
+            comp.drawableAlternatives = _newNumAlternatives;
+
+            SetLogMessage("numAlternatives changed to: " + _newNumAlternatives);
         }
 
         private void propMask_Changed(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -672,6 +710,10 @@ namespace YMTEditor
             if(clicked_btn == "tutorial")
             {
                 Process.Start("https://forum.cfx.re/t/how-to-stream-clothes-and-props-as-addons-for-mp-freemode-models/3345474");
+            }
+            else if(clicked_btn == "tutorial_heels")
+            {
+                Process.Start("https://forum.cfx.re/t/how-to-create-addon-heels-or-hide-hair-with-addon-hat/4209989");
             }
             else if(clicked_btn == "help")
             {
@@ -784,6 +826,14 @@ namespace YMTEditor
 
                 MessageBox.Show(text, "Prop properties help", MessageBoxButton.OK, MessageBoxImage.Question);
             }
+            else if (clicked_btn == "creaturemetadata")
+            {
+                string text =
+                    "This file is required for addon heels and addon hat (so it does hide hair under hat) \n\n" +
+                    "Everything is explained in second tutorial! \n\n";
+
+                MessageBox.Show(text, "Prop properties help", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
             else if(clicked_btn == "contact")
             {
                 string text =
@@ -802,7 +852,7 @@ namespace YMTEditor
             ComboBox cmb = (ComboBox)sender;
             if(cmb.SelectedItem != null)
             {
-                string btn = Convert.ToString((sender as ComboBox).DataContext);
+                string btn = Convert.ToString(cmb.DataContext);
                 string[] btn_parts = btn.Split((char)32);
                 int index = Convert.ToInt32(btn_parts[0]); //index 000, 001, 002 etc
 
@@ -829,6 +879,28 @@ namespace YMTEditor
                 }
             }
         }
+
+        private void RenderFlagsCombo_DropDownClosed(object sender, EventArgs e)
+        {
+            ComboBox cmb = (ComboBox)sender;
+            if (cmb.SelectedItem != null)
+            {
+                string btn = Convert.ToString(cmb.DataContext);
+                string propName = Convert.ToString(cmb.Tag); //name p_eyes, p_head, etc
+                string[] btn_parts = btn.Split((char)32);
+                int index = Convert.ToInt32(btn_parts[0]); //index 000, 001, 002 etc
+
+                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), propName.ToLower());
+
+                PropData propData = Props.Where(p => p.propId == enumNumber).First();
+                PropDrawable prop = propData.propList.Where(p => p.propIndex == index).First(); //get our prop
+                
+                string val = (string)cmb.SelectedValue.ToString(); //selected option from combobox
+
+                prop.propRenderFlags = val;
+            }
+        }
+
 
         private void ClearEverything()
         {
