@@ -3,6 +3,7 @@
 ### Using [Codewalker.Core](https://github.com/dexyfex/CodeWalker) by @dexyfex
 ### Download YMTEditor [here](https://github.com/grzybeek/YMTEditor/releases) ###
 ### [Tutorial](https://forum.cfx.re/t/how-to-stream-clothes-and-props-as-addons-for-mp-freemode-models/3345474) ###
+### [Second Tutorial](https://forum.cfx.re/t/how-to-create-addon-heels-or-hide-hair-with-addon-hat/4209989) ###
 
 
 #### How it works: ####
@@ -35,7 +36,6 @@
     - Save edited file to YMT
 
 **Known bugs:**
-  - expressionMods in component and prop section is not editable as i couldn't figure it how to do it (currently all P_HEAD props are saved with "-0.5 0 0 0 0", so if you are adding any head prop that shouldn't hide hair, you have to change that manually in .ymt)
   - clothData drop-down is not implemented - .ymt will be saved with "false" value
 
 _My coding skills are not greatest but it works 😛_
