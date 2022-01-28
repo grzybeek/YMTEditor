@@ -57,7 +57,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CodeWalker.Core">
-      <HintPath>D:\CodeWalker30_dev15\CodeWalker30_dev36\CodeWalker.Core.dll</HintPath>
+      <HintPath>D:\CodeWalker30_dev15\CodeWalker30_core_28.01.2022\CodeWalker.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -98,6 +98,9 @@
     <Compile Include="NewYMTWindow.xaml.cs">
       <DependentUpon>NewYMTWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RenameWindow.xaml.cs">
+      <DependentUpon>RenameWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="YMTTypes.cs" />
     <Compile Include="PropTexture.cs" />
     <Compile Include="XMLHandler.cs" />
@@ -106,6 +109,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="NewYMTWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenameWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

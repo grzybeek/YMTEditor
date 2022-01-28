@@ -399,7 +399,7 @@ namespace YMTEditor
             }
 
             XElement propInfo = new XElement("propInfo");
-            propInfo.Add(new XElement("numAvailProps", new XAttribute("value", numAvailPropsCount)));
+            propInfo.Add(new XElement("numAvailProps", new XAttribute("value", numAvailPropsCount % 256)));
 
             XElement aPropMetaData = new XElement("aPropMetaData", new XAttribute("itemType", "CPedPropMetaData"));
             foreach (var p in MainWindow.Props)
@@ -512,27 +512,31 @@ namespace YMTEditor
             XElement pedCompExpressions = new XElement("pedCompExpressions");
             if(MainWindow.Components.Where(c => c.compId == 6).Count() > 0)
             {
+                /* lets test without first entry in components
+                 * 
                 //heels doesn't have that first entry but without it, fivem was sometimes crashing(?)
                 XElement FirstpedCompItem = new XElement("Item");
-                FirstpedCompItem.Add(new XElement("pedCompID", new XAttribute("value", 6)));
-                FirstpedCompItem.Add(new XElement("pedCompVarIndex", new XAttribute("value", -1)));
-                FirstpedCompItem.Add(new XElement("pedCompExpressionIndex", new XAttribute("value", 4)));
-                FirstpedCompItem.Add(new XElement("tracks", 33));
-                FirstpedCompItem.Add(new XElement("ids", 28462));
-                FirstpedCompItem.Add(new XElement("types", 2));
-                FirstpedCompItem.Add(new XElement("components", 1));
+                FirstpedCompItem.Add(new XElement("pedCompID", new XAttribute("value", String.Format("0x{0:X}", 6))));
+                FirstpedCompItem.Add(new XElement("pedCompVarIndex", new XAttribute("value", String.Format("0x{0:X}", -1))));
+                FirstpedCompItem.Add(new XElement("pedCompExpressionIndex", new XAttribute("value", String.Format("0x{0:X}", -1))));
+                FirstpedCompItem.Add(new XElement("tracks", new XAttribute("content", "char_array"), 33));
+                FirstpedCompItem.Add(new XElement("ids", new XAttribute("content", "short_array"), 28462));
+                FirstpedCompItem.Add(new XElement("types", new XAttribute("content", "char_array"), 2));
+                FirstpedCompItem.Add(new XElement("components", new XAttribute("content", "char_array"), 1));
                 pedCompExpressions.Add(FirstpedCompItem);
+
+                */
 
                 foreach (var comp in MainWindow.Components.Where(c => c.compId == 6).First().compList)
                 {
                     XElement pedCompItem = new XElement("Item");
-                    pedCompItem.Add(new XElement("pedCompID", new XAttribute("value", 6)));
-                    pedCompItem.Add(new XElement("pedCompVarIndex", new XAttribute("value", comp.drawableIndex)));
-                    pedCompItem.Add(new XElement("pedCompExpressionIndex", new XAttribute("value", 4)));
-                    pedCompItem.Add(new XElement("tracks", 33));
-                    pedCompItem.Add(new XElement("ids", 28462));
-                    pedCompItem.Add(new XElement("types", 2));
-                    pedCompItem.Add(new XElement("components", 1));
+                    pedCompItem.Add(new XElement("pedCompID", new XAttribute("value", String.Format("0x{0:X}", 6))));
+                    pedCompItem.Add(new XElement("pedCompVarIndex", new XAttribute("value", String.Format("0x{0:X}", comp.drawableIndex))));
+                    pedCompItem.Add(new XElement("pedCompExpressionIndex", new XAttribute("value", String.Format("0x{0:X}", 4))));
+                    pedCompItem.Add(new XElement("tracks", new XAttribute("content", "char_array"), 33));
+                    pedCompItem.Add(new XElement("ids", new XAttribute("content", "short_array"), 28462));
+                    pedCompItem.Add(new XElement("types", new XAttribute("content", "char_array"), 2));
+                    pedCompItem.Add(new XElement("components", new XAttribute("content", "char_array"), 1));
                     pedCompExpressions.Add(pedCompItem);
 
                 }
@@ -544,25 +548,25 @@ namespace YMTEditor
             {
                 //all original GTA have that one first entry, without it, fivem was sometimes crashing(?)
                 XElement FirstpedPropItem = new XElement("Item");
-                FirstpedPropItem.Add(new XElement("pedPropID", new XAttribute("value", 0)));
-                FirstpedPropItem.Add(new XElement("pedPropVarIndex", new XAttribute("value", -1)));
-                FirstpedPropItem.Add(new XElement("pedPropExpressionIndex", new XAttribute("value", 0)));
+                FirstpedPropItem.Add(new XElement("pedPropID", new XAttribute("value", String.Format("0x{0:X}", 0))));
+                FirstpedPropItem.Add(new XElement("pedPropVarIndex", new XAttribute("value", String.Format("0x{0:X}", -1))));
+                FirstpedPropItem.Add(new XElement("pedPropExpressionIndex", new XAttribute("value", String.Format("0x{0:X}", -1))));
                 FirstpedPropItem.Add(new XElement("tracks", new XAttribute("content", "char_array"), 33));
-                FirstpedPropItem.Add(new XElement("ids", 13201));
-                FirstpedPropItem.Add(new XElement("types", 2));
-                FirstpedPropItem.Add(new XElement("components", 1));
+                FirstpedPropItem.Add(new XElement("ids", new XAttribute("content", "short_array"), 13201));
+                FirstpedPropItem.Add(new XElement("types", new XAttribute("content", "char_array"), 2));
+                FirstpedPropItem.Add(new XElement("components", new XAttribute("content", "char_array"), 1));
                 pedPropExpressions.Add(FirstpedPropItem);
 
                 foreach (var prop in MainWindow.Props.Where(p => p.propId == 0).First().propList)
                 {
                     XElement pedPropItem = new XElement("Item");
-                    pedPropItem.Add(new XElement("pedPropID", new XAttribute("value", 0)));
-                    pedPropItem.Add(new XElement("pedPropVarIndex", new XAttribute("value", prop.propIndex)));
-                    pedPropItem.Add(new XElement("pedPropExpressionIndex", new XAttribute("value", 0)));
+                    pedPropItem.Add(new XElement("pedPropID", new XAttribute("value", String.Format("0x{0:X}", 0))));
+                    pedPropItem.Add(new XElement("pedPropVarIndex", new XAttribute("value", String.Format("0x{0:X}", prop.propIndex))));
+                    pedPropItem.Add(new XElement("pedPropExpressionIndex", new XAttribute("value", String.Format("0x{0:X}", 0))));
                     pedPropItem.Add(new XElement("tracks", new XAttribute("content", "char_array"), 33));
-                    pedPropItem.Add(new XElement("ids", 13201));
-                    pedPropItem.Add(new XElement("types", 2));
-                    pedPropItem.Add(new XElement("components", 1));
+                    pedPropItem.Add(new XElement("ids", new XAttribute("content", "short_array"), 13201));
+                    pedPropItem.Add(new XElement("types", new XAttribute("content", "char_array"), 2));
+                    pedPropItem.Add(new XElement("components", new XAttribute("content", "char_array"), 1));
                     pedPropExpressions.Add(pedPropItem);
                 }
             }

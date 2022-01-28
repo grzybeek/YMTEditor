@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,7 @@ namespace YMTEditor
         public static TextBlock _logBar;
         public static MenuItem _version;
         public static MenuItem _creatureGenButton;
+        public static MenuItem _renameButton;
 
         public static ObservableCollection<ComponentData> Components;
         public static ObservableCollection<PropData> Props;
@@ -39,6 +41,7 @@ namespace YMTEditor
             _removeAsk = (MenuItem)FindName("RemovingAskCheck");
             _version = (MenuItem)FindName("version");
             _creatureGenButton = (MenuItem)FindName("CreatureGen");
+            _renameButton = (MenuItem)FindName("RenameBtn");
 
             _removeAsk.IsChecked = Properties.Settings.Default.removeAsk;
             SetLogMessage("Loaded options");
@@ -60,17 +63,20 @@ namespace YMTEditor
             newWindow.ShowDialog();
 
             fullName = newWindow.fullName;
-            dlcName = newWindow.input;
+
+            if(newWindow.ped.IsChecked == true)
+            {
+                dlcName = ""; //non-mp peds doesn't have dlcName set
+            }
+            else
+            {
+                dlcName = newWindow.input;
+            }
+            
             XMLHandler.CPedVariationInfo = dlcName;
             XMLHandler.dlcName = dlcName;
 
-            _componentsMenu.IsEnabled = true;
-            _componentsMenu.ToolTip = "Check/Uncheck components";
-            _propsMenu.IsEnabled = true;
-            _propsMenu.ToolTip = "Check/Uncheck props";
-
-            _creatureGenButton.IsEnabled = true;
-            _creatureGenButton.ToolTip = "Generate creaturemetadata file - only used with heels(FEET) and hats(P_HEAD)";
+            EnableMenus();
 
             SetLogMessage("Created new file");
 
@@ -87,33 +93,7 @@ namespace YMTEditor
             bool? result = xmlFile.ShowDialog();
             if (result == true)
             {
-                ClearEverything(); //so if we import another file when something is imported it will clear
-                
-                string filename = xmlFile.FileName;
-                try
-                {
-                    XMLHandler.LoadXML(filename);
-                    _componentsMenu.IsEnabled = true;
-                    _componentsMenu.ToolTip = "Check/Uncheck components";
-                    _propsMenu.IsEnabled = true;
-                    _propsMenu.ToolTip = "Check/Uncheck props";
-
-                    _creatureGenButton.IsEnabled = true;
-                    _creatureGenButton.ToolTip = "Generate creaturemetadata file - only used with heels(FEET) and hats(P_HEAD)";
-
-                    SetLogMessage("Loaded XML from path: " + filename);
-
-                    fullName = Path.GetFileNameWithoutExtension(filename); //removes .xml
-                    fullName = Path.GetFileNameWithoutExtension(fullName); //removes .ymt
-
-                    this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt.xml";
-                }
-                catch (Exception)
-                {
-                    ClearEverything();
-                    MessageBox.Show("Failed to load XML YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include XML YMT you tried to load!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-
+                OpenFileFunction(xmlFile.FileName);
             }
         }
 
@@ -152,38 +132,7 @@ namespace YMTEditor
             bool? result = ymtFile.ShowDialog();
             if (result == true)
             {
-                string filename = ymtFile.FileName;
-                byte[] ymtBytes = File.ReadAllBytes(filename);
-
-                ClearEverything(); //so if we import another file when something is imported it will clear
-
-                PedFile ymt = new PedFile();
-                RpfFile.LoadResourceFile<PedFile>(ymt, ymtBytes, 2);
-                string xml = MetaXml.GetXml(ymt.Meta);
-
-                try
-                {
-                    XMLHandler.LoadXML(xml);
-                    _componentsMenu.IsEnabled = true;
-                    _componentsMenu.ToolTip = "Check/Uncheck components";
-                    _propsMenu.IsEnabled = true;
-                    _propsMenu.ToolTip = "Check/Uncheck props";
-
-                    _creatureGenButton.IsEnabled = true;
-                    _creatureGenButton.ToolTip = "Generate creaturemetadata file - only used with heels(FEET) and hats(P_HEAD)";
-
-                    SetLogMessage("Loaded YMT from path: " + filename);
-
-                    fullName = Path.GetFileNameWithoutExtension(filename);
-
-                    this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt";
-                }
-                catch (Exception)
-                {
-                    ClearEverything();
-                    MessageBox.Show("Failed to load YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include YMT you tried to load!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            
+                OpenFileFunction(ymtFile.FileName);
             }
         }
 
@@ -219,6 +168,74 @@ namespace YMTEditor
             }
         }
 
+        private void DragAndDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                // Note that you can have more than one file.
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                var file = files[0];
+                string extension = Path.GetExtension(file);
+                if(extension == ".ymt" || extension == ".xml")
+                {
+                    OpenFileFunction(file);
+                }
+            }
+        }
+
+        private void OpenFileFunction(String filePath)
+        {
+            string extension = Path.GetExtension(filePath);
+            if (extension == ".ymt")
+            {
+                byte[] ymtBytes = File.ReadAllBytes(filePath);
+
+                ClearEverything(); //so if we import another file when something is imported it will clear
+
+                PedFile ymt = new PedFile();
+                RpfFile.LoadResourceFile<PedFile>(ymt, ymtBytes, 2);
+                string xml = MetaXml.GetXml(ymt.Meta);
+
+                try
+                {
+                    XMLHandler.LoadXML(xml);
+                    EnableMenus();
+
+                    SetLogMessage("Loaded YMT from path: " + filePath);
+
+                    fullName = Path.GetFileNameWithoutExtension(filePath);
+
+                    this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt";
+                }
+                catch (Exception)
+                {
+                    ClearEverything();
+                    MessageBox.Show("Failed to load YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include YMT you tried to load!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else if(extension == ".xml")
+            {
+                ClearEverything(); //so if we import another file when something is imported it will clear
+
+                try
+                {
+                    XMLHandler.LoadXML(filePath);
+
+                    SetLogMessage("Loaded XML from path: " + filePath);
+
+                    fullName = Path.GetFileNameWithoutExtension(filePath); //removes .xml
+                    fullName = Path.GetFileNameWithoutExtension(fullName); //removes .ymt
+
+                    this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt.xml";
+                }
+                catch (Exception)
+                {
+                    ClearEverything();
+                    MessageBox.Show("Failed to load XML YMT, please report it!\n\nReport it on github or discord: grzybeek#9100\nPlease include XML YMT you tried to load!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
         private void GenerateCreature_Click(object sender, RoutedEventArgs e)
         {
             if(Components.Where(c => c.compId == 6).Count() > 0 || (Props.Where(p => p.propId == 0).Count() > 0))
@@ -237,10 +254,9 @@ namespace YMTEditor
                         string filename = CreatureMetadataFile.FileName;
                     
                         System.Xml.XmlDocument creature = XMLHandler.SaveCreature(filename);
-                        Meta meta = XmlMeta.GetMeta(creature);
-                        byte[] newYmtBytes = ResourceBuilder.Build(meta, 2);
+                        RbfFile rbf = XmlRbf.GetRbf(creature);
 
-                        File.WriteAllBytes(filename, newYmtBytes);
+                        File.WriteAllBytes(filename, rbf.Save());
 
                         SetLogMessage("Saved CreatureMetadata to path: " + filename);
                     }
@@ -254,6 +270,31 @@ namespace YMTEditor
             else
             {
                 MessageBox.Show("You need to add FEET or P_HEAD first!", "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void Rename_Click(object sender, RoutedEventArgs e)
+        {
+            if (dlcName.Length > 0)
+            {
+                RenameWindow renameWindow = new RenameWindow(fullName, dlcName);
+                renameWindow.ShowDialog();
+
+                string _newDlcName = renameWindow.input;
+                string _newFullName = renameWindow.NewfullName;
+
+                XMLHandler.CPedVariationInfo = _newDlcName;
+                XMLHandler.dlcName = _newDlcName;
+                fullName = _newFullName;
+                dlcName = _newDlcName;
+
+                SetLogMessage("Renamed to " + _newFullName);
+                this.Title = "YMTEditor by grzybeek - editing " + _newFullName + ".ymt";
+            }
+            else
+            {
+                MessageBox.Show("Your dlc name is empty!\nYou can't rename it in editor. Please create new ymt instead.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
         }
 
@@ -921,6 +962,33 @@ namespace YMTEditor
             Props.Clear(); 
         }
 
+        private void EnableMenus()
+        {
+            _renameButton.IsEnabled = true;
+            _renameButton.ToolTip = "Change current dlc name";
+
+            _componentsMenu.IsEnabled = true;
+            _componentsMenu.ToolTip = "Check/Uncheck components";
+            _propsMenu.IsEnabled = true;
+            _propsMenu.ToolTip = "Check/Uncheck props";
+
+            _creatureGenButton.IsEnabled = true;
+            _creatureGenButton.ToolTip = "Generate creaturemetadata file - only used with heels(FEET) and hats(P_HEAD)";
+        }
+
+        // https://stackoverflow.com/a/60736900 idk if that's a good way of checking
+        private bool CheckInternetConnection()
+        {
+            if (NetworkInterface.GetIsNetworkAvailable() && new Ping().Send(new IPAddress(new byte[] { 8, 8, 8, 8 }), 2000).Status == IPStatus.Success)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         //version compare taken and edited from https://github.com/smallo92/Ymap-YbnMover/blob/master/ymapmover/Startup.cs
         private void CheckForUpdates()
         {
@@ -929,32 +997,37 @@ namespace YMTEditor
             string version = fvi.FileVersion.ToString();
             _version.Header = "Current version: " + version;
 
-            WebClient webclient = new WebClient();
-            Stream stream = webclient.OpenRead("https://raw.githubusercontent.com/grzybeek/YMTEditor/master/YMTEditor/version.txt");
-            StreamReader reader = new StreamReader(stream);
-
-            string githubVersion = reader.ReadToEnd().ToString();
-
-            if(version != githubVersion)
+            if (CheckInternetConnection())
             {
-                MessageBoxResult result = MessageBox.Show(this, "There is new version of YMTEditor available!\nYour version: " + version + "\nAvailable version: " + githubVersion + " \n\nDo you want to download it now?\n\nClick YES to open website and close editor\nClick NO to open editor", "New version available!", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                if (result == MessageBoxResult.Yes)
+                WebClient webclient = new WebClient();
+                Stream stream = webclient.OpenRead("https://raw.githubusercontent.com/grzybeek/YMTEditor/master/YMTEditor/version.txt");
+                StreamReader reader = new StreamReader(stream);
+
+                string githubVersion = reader.ReadToEnd().ToString();
+
+                if (version != githubVersion)
                 {
-                    //probably better would be auto-updater but idk how to do it yet
-                    Process.Start("https://github.com/grzybeek/YMTEditor/releases");
-                    Environment.Exit(0);
+                    MessageBoxResult result = MessageBox.Show(this, "There is new version of YMTEditor available!\nYour version: " + version + "\nAvailable version: " + githubVersion + " \n\nDo you want to download it now?\n\nClick YES to open website and close editor\nClick NO to open editor", "New version available!", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        //probably better would be auto-updater but idk how to do it yet
+                        Process.Start("https://github.com/grzybeek/YMTEditor/releases");
+                        Environment.Exit(0);
+                    }
+                    else if (result == MessageBoxResult.No)
+                    {
+                        //open editor
+                    }
                 }
-                else if (result == MessageBoxResult.No)
+                else
                 {
-                    //open editor
+                    //good version, open editor
                 }
             }
             else
             {
-                //good version, open editor
+                //no internet, open editor
             }
         }
-
-        
     }
 }

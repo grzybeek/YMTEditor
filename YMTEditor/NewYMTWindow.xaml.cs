@@ -84,7 +84,7 @@ namespace YMTEditor
 
         private void ButtonHelp_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("1. Select for which MP character will your YMT work \n2. Type name of your choice, for example 'custom_clothes' \n3. Your full YMT is combined with gender and input" +
+            MessageBox.Show("1. Select for which ped will your YMT work (other ped is for people that are doing custom peds or so) \n2. Type name of your choice, for example 'custom_clothes' \n3. Your full YMT is combined with gender and input" +
                 " \n\nIf you are going to stream clothes to FiveM it should be prefixed with your full YMT name, for example: \n\n(IT IS ONLY EXAMPLE, DONT COPY IT, USE YOUR FULL YMT NAME)\n\nmp_m_freemode_01_custom_clothes^jbib_000_u.ydd\nmp_m_freemode_01_custom_clothes^jbib_diff_000_a_uni.ytd \netc...", "Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -98,6 +98,10 @@ namespace YMTEditor
             else if(female.IsChecked == true)
             {
                 _gender = "mp_f_freemode_01_";
+            }
+            else if(ped.IsChecked == true)
+            {
+                _gender = "";
             }
 
             fullName = _gender + input;
