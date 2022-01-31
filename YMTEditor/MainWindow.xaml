@@ -170,7 +170,7 @@
                                                                                     </StackPanel>
                                                                                     <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Horizontal">
                                                                                         <TextBlock ToolTip="Don't edit clothData if you don't know what are you doing!" Text="clothData: "></TextBlock>
-                                                                                        <ComboBox SelectedIndex="0" Width="60">
+                                                                                        <ComboBox Name="ClothCombo" DropDownClosed="ClothCombo_DropDownClosed" SelectedIndex="{Binding drawableHasCloth}" SelectedValuePath="Content" Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}, AncestorLevel=1}, Path=Header.Text, Mode=TwoWay}" Width="60">
                                                                                             <ComboBoxItem Content="False" />
                                                                                             <ComboBoxItem Content="True" />
                                                                                         </ComboBox>

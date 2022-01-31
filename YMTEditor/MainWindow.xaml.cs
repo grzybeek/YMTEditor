@@ -942,6 +942,25 @@ namespace YMTEditor
             }
         }
 
+        private void ClothCombo_DropDownClosed(object sender, EventArgs e)
+        {
+            ComboBox cmb = (ComboBox)sender;
+            if (cmb.SelectedItem != null)
+            {
+                string btn = Convert.ToString(cmb.DataContext);
+                string[] btn_parts = btn.Split((char)32);
+                int index = Convert.ToInt32(btn_parts[0]); //index 000, 001, 002 etc
+
+                string compName = (string)(sender as FrameworkElement).Tag; //name jbib, lowr, hand etc
+                int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), compName.ToLower());
+                int _index = Convert.ToInt32(Components.Where(z => z.compId == enumNumber).First().compIndex);
+
+                bool val = Convert.ToBoolean(cmb.SelectedValue.ToString()); //selected option from combobox
+
+                ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == index).First(); //get component
+                comp.drawableHasCloth = val;
+            }
+        }
 
         private void ClearEverything()
         {
