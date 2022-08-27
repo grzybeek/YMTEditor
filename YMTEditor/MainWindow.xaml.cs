@@ -30,6 +30,8 @@ namespace YMTEditor
         public static string fullName; //whole name "mp_m_freemode_01_XXXXXX"
         public static string dlcName; //only XXXXX
 
+        private string openedPath;
+
         public MainWindow()
         {
 
@@ -103,7 +105,8 @@ namespace YMTEditor
             {
                 DefaultExt = ".ymt.xml",
                 Filter = "Codewalker YMT XML (*.ymt.xml)|*.ymt.xml",
-                FileName = fullName
+                FileName = fullName,
+                InitialDirectory = openedPath
             };
             bool? result = xmlFile.ShowDialog();
             if (result == true)
@@ -142,7 +145,8 @@ namespace YMTEditor
             {
                 DefaultExt = ".ymt",
                 Filter = "Peds YMT (*.ymt)|*.ymt",
-                FileName = fullName
+                FileName = fullName,
+                InitialDirectory = openedPath
             };
             bool? result = xmlFile.ShowDialog();
             if (result == true)
@@ -204,6 +208,7 @@ namespace YMTEditor
                     SetLogMessage("Loaded YMT from path: " + filePath);
 
                     fullName = Path.GetFileNameWithoutExtension(filePath);
+                    openedPath = Path.GetDirectoryName(filePath);
 
                     this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt";
                 }
@@ -225,6 +230,7 @@ namespace YMTEditor
 
                     fullName = Path.GetFileNameWithoutExtension(filePath); //removes .xml
                     fullName = Path.GetFileNameWithoutExtension(fullName); //removes .ymt
+                    openedPath = Path.GetDirectoryName(filePath);
 
                     this.Title = "YMTEditor by grzybeek - editing " + fullName + ".ymt.xml";
                 }
@@ -334,6 +340,11 @@ namespace YMTEditor
                 int _index = Convert.ToInt32(Components.Where(z => z.compType == btn.ToLower()).First().compIndex); //index of our component
                 int compId = Convert.ToInt32(Components.Where(z => z.compType == btn.ToLower()).First().compId); //id of component (11 = jbib, 4 = lowr, etc)
                 int drawIndex = Components.ElementAt(_index).compList.Count(); //drawable index (000, 001, 002 etc)
+
+                if (drawIndex == 128)
+                {
+                    MessageBox.Show("More than 127 drawables in component might cause issues (people may see different models)", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
 
                 ComponentInfo defaultInfo = new ComponentInfo("none", "none", new string[] { "0", "0", "0", "0", "0" }, 0, "0", "0", "PV_COMP_HEAD", 0, compId, drawIndex); // default compInfo values
 

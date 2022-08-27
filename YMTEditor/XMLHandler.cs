@@ -160,12 +160,10 @@ namespace YMTEditor
                 string comphash_2FD08CEF = compInfo_node.Element("hash_2FD08CEF").Value.ToString(); //unknown usage
                 string comphash_FC507D28 = compInfo_node.Element("hash_FC507D28").Value.ToString(); //unknown usage
 
-                string[] comphash_07AE529D = null; //probably expressionMods(?) - used for heels for example
-                if (compInfo_node.Element("hash_07AE529D").Value.Length == 9) //normal "0 0 0 0 0"
-                {
-                    comphash_07AE529D = compInfo_node.Element("hash_07AE529D").Value.Split(' ');
-                }
-                else if(compInfo_node.Element("hash_07AE529D").Value.Length == 10)//that means, we have weird metatool value "0000000000" without spaces
+                string[] comphash_07AE529D = compInfo_node.Element("hash_07AE529D").Value.Split(' '); //probably expressionMods(?) - used for heels for example
+                
+                //if not 5, then it didn't split properly (probably "0000000000" value from metatool?)
+                if (comphash_07AE529D.Length != 5)
                 {
                     string s = compInfo_node.Element("hash_07AE529D").Value.ToString();
                     List<String> temp = new List<String>();
@@ -178,10 +176,6 @@ namespace YMTEditor
                     }
 
                     comphash_07AE529D = temp.ToArray();
-                }
-                else //maybe there is other case and i don't about it, then split by space
-                {
-                    comphash_07AE529D = compInfo_node.Element("hash_07AE529D").Value.Split(' ');
                 }
 
                 int compflags = Convert.ToInt32(compInfo_node.Element("flags").FirstAttribute.Value); //unknown usage
@@ -222,12 +216,9 @@ namespace YMTEditor
 
                     string p_audioId = propMetaData.Element("audioId").Value.ToString();
 
-                    string[] p_expressionMods = null;
-                    if (propMetaData.Element("expressionMods").Value.Length == 9) //normal "0 0 0 0 0"
-                    {
-                        p_expressionMods = propMetaData.Element("expressionMods").Value.Split(' ');//split on space
-                    }
-                    else if (propMetaData.Element("expressionMods").Value.Length == 10)//that means, we have weird metatool value "0000000000" without spaces
+                    string[] p_expressionMods = propMetaData.Element("expressionMods").Value.Split(' ');
+                    //if not 5, then it didn't split properly (probably "0000000000" value from metatool?)
+                    if (p_expressionMods.Length != 5)
                     {
                         string s = propMetaData.Element("expressionMods").Value.ToString();
                         List<String> temp = new List<String>();
@@ -240,10 +231,6 @@ namespace YMTEditor
                         }
 
                         p_expressionMods = temp.ToArray();
-                    }
-                    else //maybe there is other case and i don't about it, then just split by space
-                    {
-                        p_expressionMods = propMetaData.Element("expressionMods").Value.Split(' ');
                     }
 
                     string p_renderFlag = propMetaData.Element("renderFlags").Value.ToString();
