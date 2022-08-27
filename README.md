@@ -36,6 +36,6 @@
     - Save edited file to YMT
 
 **Known bugs:**
-  - clothData drop-down is not implemented - .ymt will be saved with "false" value
+  - none
 
 _My coding skills are not greatest but it works 😛_
