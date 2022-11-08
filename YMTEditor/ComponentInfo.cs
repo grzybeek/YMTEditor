@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace YMTEditor
+﻿namespace YMTEditor
 {
     public class ComponentInfo
     {
@@ -29,6 +27,21 @@ namespace YMTEditor
 
             infoHash_D12F579D = hash_D12F579D;
             infoHash_FA1F27BF = hash_FA1F27BF;
+        }
+
+        public ComponentInfo(int componentId, int drawableIndex)
+        {
+            infoHash_2FD08CEF = "none";
+            infoHash_FC507D28 = "none";
+            infoHash_07AE529D = new string[] { "0", "0", "0", "0", "0" };
+            infoFlags = 0;
+            infoInclusions = "0";
+            infoExclusions = "0";
+            infoHash_6032815C = "PV_COMP_HEAD";
+            infoHash_7E103C8B = 0;
+
+            infoHash_D12F579D = componentId;
+            infoHash_FA1F27BF = drawableIndex;
         }
     }
 }

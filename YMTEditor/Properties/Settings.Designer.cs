@@ -34,5 +34,17 @@ namespace YMTEditor.Properties {
                 this["removeAsk"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool enableLogs {
+            get {
+                return ((bool)(this["enableLogs"]));
+            }
+            set {
+                this["enableLogs"] = value;
+            }
+        }
     }
 }

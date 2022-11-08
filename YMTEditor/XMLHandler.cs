@@ -78,7 +78,7 @@ namespace YMTEditor
                     if (comp != "255")
                     {
                         string _name = Enum.GetName(typeof(YMTTypes.ComponentNumbers), compId);
-                        ComponentData componentName = new ComponentData(_name, compId, compIndex, new ObservableCollection<ComponentDrawable>()) { compHeader = _name.ToUpper() };
+                        ComponentData componentName = new ComponentData(_name, compId, compIndex, new ObservableCollection<ComponentDrawable>());
                         MainWindow.Components.Add(componentName);
 
                         MenuItem item = (MenuItem)MainWindow._componentsMenu.FindName(_name);
@@ -143,7 +143,7 @@ namespace YMTEditor
                     _curComp.compList.Add(_curDrawable);
                     foreach (var texture_node in drawable_node.Descendants("aTexData").Elements("Item"))
                     {
-                        string texId = texture_node.Element("texId").FirstAttribute.Value;
+                        int texId = Convert.ToInt32(texture_node.Element("texId").FirstAttribute.Value);
                         _curDrawable.dTexturesTexId = Convert.ToInt32(texId);//used to set proper dropdown value
                         string texLetter = Number2String(textureIndex, false);
                         _curDrawable.drawableTextures.Add(new ComponentTexture(texLetter, texId));
@@ -207,7 +207,7 @@ namespace YMTEditor
             }
 
             //read props
-            int oldPropId = -1; //reset index on new anchor
+            int oldAnchorId = -1; //reset index on new anchor
             int _curPropDrawableIndex = 0;
             foreach (var propinfo_node in xmlFile.Descendants("propInfo"))
             {
@@ -240,14 +240,14 @@ namespace YMTEditor
                     int p_propId = Convert.ToInt32(propMetaData.Element("propId").FirstAttribute.Value);
                     int p_hash = Convert.ToInt32(propMetaData.Element("hash_AC887A91").FirstAttribute.Value);
 
-                    if (oldPropId != p_anchorId)//reset index on new anchor
+                    if (oldAnchorId != p_anchorId)//reset index on new anchorid
                     {
                         _curPropDrawableIndex = 0;
                     }
 
-                    PropData _curPropData = MainWindow.Props.Where(p => p.propId == p_anchorId).First();
-
-                    PropDrawable _curPropDrawable = new PropDrawable(_curPropDrawableIndex, p_audioId, p_expressionMods, new ObservableCollection<PropTexture>(), p_renderFlag, p_propFlag, p_flag, p_anchorId, p_propId, p_hash);
+                    PropData _curPropData = MainWindow.Props.Where(p => p.propAnchorId == p_anchorId).First();
+                    int textureCount = propMetaData.Descendants("texData").Elements("Item").Count();
+                    PropDrawable _curPropDrawable = new PropDrawable(_curPropDrawableIndex, textureCount, p_audioId, p_expressionMods, new ObservableCollection<PropTexture>(), p_renderFlag, p_propFlag, p_flag, p_anchorId, p_propId, p_hash);
 
                     int texturePropIndex = 0;
                     foreach (var texData in propMetaData.Descendants("texData").Elements("Item"))
@@ -268,7 +268,7 @@ namespace YMTEditor
                     _curPropData.propList.Add(_curPropDrawable);
 
                     _curPropDrawableIndex++;
-                    oldPropId = p_anchorId;
+                    oldAnchorId = p_anchorId;
                 }
 
             }
@@ -312,7 +312,7 @@ namespace YMTEditor
                     foreach (var txt in MainWindow.Components.ElementAt(i).compList.ElementAt(j).drawableTextures)
                     {
                         XElement TexDataItem = new XElement("Item");
-                        string _texId = txt.textureTexId;
+                        int _texId = txt.textureTexId;
                         TexDataItem.Add(new XElement("texId", new XAttribute("value", _texId)));
                         TexDataItem.Add(new XElement("distribution", new XAttribute("value", 255)));
                         TexDataIndex.Add(TexDataItem);
@@ -423,7 +423,7 @@ namespace YMTEditor
                     aPropMetaDataItem.Add(new XElement("propFlags", new XAttribute("value", prop.propPropFlags)));
                     aPropMetaDataItem.Add(new XElement("flags", new XAttribute("value", prop.propFlags)));
                     aPropMetaDataItem.Add(new XElement("anchorId", new XAttribute("value", prop.propAnchorId)));
-                    aPropMetaDataItem.Add(new XElement("propId", new XAttribute("value", prop.propPropId)));
+                    aPropMetaDataItem.Add(new XElement("propId", new XAttribute("value", prop.propIndex))); //propId is index of a prop in the same anchorid, so we can use index instead
                     aPropMetaDataItem.Add(new XElement("hash_AC887A91", new XAttribute("value", prop.propHash_AC887A91)));
                     aPropMetaData.Add(aPropMetaDataItem);
                 }
@@ -531,7 +531,7 @@ namespace YMTEditor
             xml.Add(pedCompExpressions);
 
             XElement pedPropExpressions = new XElement("pedPropExpressions");
-            if(MainWindow.Props.Where(p => p.propId == 0).Count() > 0)
+            if(MainWindow.Props.Where(p => p.propAnchorId == 0).Count() > 0)
             {
                 //all original GTA have that one first entry, without it, fivem was sometimes crashing(?)
                 XElement FirstpedPropItem = new XElement("Item");
@@ -544,7 +544,7 @@ namespace YMTEditor
                 FirstpedPropItem.Add(new XElement("components", new XAttribute("content", "char_array"), 1));
                 pedPropExpressions.Add(FirstpedPropItem);
 
-                foreach (var prop in MainWindow.Props.Where(p => p.propId == 0).First().propList)
+                foreach (var prop in MainWindow.Props.Where(p => p.propAnchorId == 0).First().propList)
                 {
                     XElement pedPropItem = new XElement("Item");
                     pedPropItem.Add(new XElement("pedPropID", new XAttribute("value", String.Format("0x{0:X}", 0))));

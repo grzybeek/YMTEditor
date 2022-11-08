@@ -3,7 +3,6 @@
     public class PropTexture
     {
         public string textureIndex { get; set; }
-
         public string propInclusions { get; set; }
         public string propExclusions { get; set; }
         public int propTexId { get; set; }//different thing than in components, its index of texture of current prop
@@ -22,5 +21,15 @@
             propDistribution = distribution;
         }
 
+        public PropTexture(string txtletter, int index)
+        {
+            textureIndex = txtletter;
+            propInclusions = "0";
+            propExclusions = "0";
+            propTexId = index;
+            propInclusionId = 0;
+            propExclusionId = 0;
+            propDistribution = 255;
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace YMTEditor
 {
@@ -8,9 +7,9 @@ namespace YMTEditor
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string textureIndex { get; set; }
-        private string _textureTexId;
+        private int _textureTexId;
 
-        public string textureTexId
+        public int textureTexId
         {
             get { return _textureTexId; }
             set
@@ -21,11 +20,16 @@ namespace YMTEditor
             }
         }
 
-        public ComponentTexture(string index, string texId)
+        public ComponentTexture(string index, int texId)
         {
             textureIndex = index;
             textureTexId = texId;
         }
 
+        public ComponentTexture()
+        {
+            textureIndex = "a";
+            textureTexId = 0;
+        }
     }
 }

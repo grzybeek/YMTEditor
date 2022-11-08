@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace YMTEditor
@@ -20,7 +18,17 @@ namespace YMTEditor
                     PropertyChanged(this, new PropertyChangedEventArgs("drawableIndex"));
             }
         }
-        public int drawableTextureCount { get; set; }
+        private int _drawableTextureCount;
+        public int drawableTextureCount
+        {
+            get { return _drawableTextureCount; }
+            set
+            {
+                _drawableTextureCount = value;
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("drawableTextureCount"));
+            }
+        }
 
         private int _drawablePropMask;
         public int drawablePropMask
@@ -66,6 +74,26 @@ namespace YMTEditor
         public override string ToString() //used to determine if clicked texture or drawable button (return is displayed as DataContext of button) (MainWindow.xaml.cs -> Button_Click_AddComponent)
         {
             return drawableIndex + " " + drawableTextureCount;
+        }
+
+        //default values
+        public ComponentDrawable(int componentId, int index, int textureCount = 1)
+        {
+            drawableIndex = index;
+            drawableTextureCount = textureCount;
+            drawablePropMask = 1;
+            drawableAlternatives = 0;
+            drawableHasCloth = false;
+            drawableTextures = new ObservableCollection<ComponentTexture>();
+            for (int i = 0; i < textureCount; i++)
+            {
+                string txtLetter = XMLHandler.Number2String(i, false);
+                drawableTextures.Add(new ComponentTexture(txtLetter, 0));
+            };
+            drawableInfo = new ObservableCollection<ComponentInfo>()
+            {
+                new ComponentInfo(componentId, index) // default compInfo values
+            };
         }
     }
 }

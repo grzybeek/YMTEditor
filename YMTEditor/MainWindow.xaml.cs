@@ -19,6 +19,7 @@ namespace YMTEditor
         public static MenuItem _componentsMenu;
         public static MenuItem _propsMenu;
         public static MenuItem _removeAsk;
+        public static MenuItem _enableLogs;
         public static TextBlock _logBar;
         public static MenuItem _version;
         public static MenuItem _creatureGenButton;
@@ -41,11 +42,13 @@ namespace YMTEditor
             _propsMenu = (MenuItem)FindName("PropsMenu");
             _logBar = (TextBlock)FindName("logBar");
             _removeAsk = (MenuItem)FindName("RemovingAskCheck");
+            _enableLogs = (MenuItem)FindName("EnableLogs");
             _version = (MenuItem)FindName("version");
             _creatureGenButton = (MenuItem)FindName("CreatureGen");
             _renameButton = (MenuItem)FindName("RenameBtn");
 
             _removeAsk.IsChecked = Properties.Settings.Default.removeAsk;
+            _enableLogs.IsChecked = Properties.Settings.Default.enableLogs;
             SetLogMessage("Loaded options");
 
             Components = new ObservableCollection<ComponentData>();
@@ -244,7 +247,7 @@ namespace YMTEditor
 
         private void GenerateCreature_Click(object sender, RoutedEventArgs e)
         {
-            if(Components.Where(c => c.compId == 6).Count() > 0 || (Props.Where(p => p.propId == 0).Count() > 0))
+            if(Components.Where(c => c.compId == 6).Count() > 0 || (Props.Where(p => p.propAnchorId == 0).Count() > 0))
             {
                 SaveFileDialog CreatureMetadataFile = new SaveFileDialog
                 {
@@ -314,7 +317,6 @@ namespace YMTEditor
                 int txtCount = Convert.ToInt32(btn_parts[1]); // current textures
                 
                 string drawableName = Convert.ToString((sender as Button).Tag); //drawable we are adding txt jbib/teef/lowr etc
-                int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), drawableName.ToLower());
                 
                 if (txtCount >= 26)
                 {
@@ -322,11 +324,11 @@ namespace YMTEditor
                     return;
                 }
 
-                int _index = Convert.ToInt32(Components.Where(z => z.compId == enumNumber).First().compIndex); //component index in our ymt
+                ComponentData compData = Components.Where(z => z.compType == drawableName.ToLower()).First(); //component index in our ymt
 
-                ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == index).First(); //get component
-                int drawableToAddTexture = Components.ElementAt(_index).compList.IndexOf(comp); //get index of our clicked comonent in collection
-                string _FirstTexId = Components.ElementAt(_index).compList.ElementAt(drawableToAddTexture).drawableTextures.First().textureTexId; //get texId of first texture to keep same texid
+                ComponentDrawable comp = compData.compList.Where(c => c.drawableIndex == index).First(); //get component
+                int drawableToAddTexture = compData.compList.IndexOf(comp); //get index of our clicked comonent in collection
+                int _FirstTexId = compData.compList.ElementAt(drawableToAddTexture).drawableTextures.First().textureTexId; //get texId of first texture to keep same texid
 
                 string txtLetter = XMLHandler.Number2String(txtCount, false);
                 comp.drawableTextures.Add(new ComponentTexture(txtLetter, _FirstTexId));
@@ -337,21 +339,16 @@ namespace YMTEditor
             else //else add new drawable number
             {
 
-                int _index = Convert.ToInt32(Components.Where(z => z.compType == btn.ToLower()).First().compIndex); //index of our component
-                int compId = Convert.ToInt32(Components.Where(z => z.compType == btn.ToLower()).First().compId); //id of component (11 = jbib, 4 = lowr, etc)
-                int drawIndex = Components.ElementAt(_index).compList.Count(); //drawable index (000, 001, 002 etc)
+                ComponentData compData = Components.Where(z => z.compType == btn.ToLower()).First(); //index of our component
+                int drawIndex = compData.compList.Count(); //drawable index (000, 001, 002 etc)
 
                 if (drawIndex == 128)
                 {
                     MessageBox.Show("More than 127 drawables in component might cause issues (people may see different models)", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
 
-                ComponentInfo defaultInfo = new ComponentInfo("none", "none", new string[] { "0", "0", "0", "0", "0" }, 0, "0", "0", "PV_COMP_HEAD", 0, compId, drawIndex); // default compInfo values
-
-                ComponentDrawable _newDrawable = new ComponentDrawable(drawIndex, 1, 1, 0, false, new ObservableCollection<ComponentTexture>(), new ObservableCollection<ComponentInfo>());
-                _newDrawable.drawableTextures.Add(new ComponentTexture("a", "0"));
-                _newDrawable.drawableInfo.Add(defaultInfo);
-                Components.ElementAt(_index).compList.Add(_newDrawable);
+                ComponentDrawable _newDrawable = new ComponentDrawable(compData.compId, drawIndex);
+                compData.compList.Add(_newDrawable);
 
                 SetLogMessage("Added new drawable (number " + String.Format("{0:D3}", drawIndex) + ") to " + btn + " component");
             }
@@ -365,42 +362,40 @@ namespace YMTEditor
             if (btn_parts.Length > 1) // if more than 1 then add texture
             {
                 int index = Convert.ToInt32(btn_parts[0]); //clicked number 000/001/002 etc
-                int txtCount = Convert.ToInt32(btn_parts[1]); // current textures
-
+                
                 string propName = Convert.ToString((sender as Button).Tag); //drawable we are adding txt (p_head, p_eyes etc)
-                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), propName.ToLower()); //0 = p_head, 1 = p_eyes etc -> YMTTypes.cs (it is also anchorId of prop)
+                
+                PropDrawable prop = Props.Where(p => p.propType == propName.ToLower()).First().propList.Where(p => p.propIndex == index).First(); // get prop
+                int txtCount = prop.propTextureCount;
 
                 if (txtCount >= 26)
                 {
                     MessageBox.Show("Can't add more textures, limit is 26! (a-z)", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
-                }            
-
-                PropDrawable prop = Props.Where(p => p.propId == enumNumber).First().propList.Where(p => p.propIndex == index).First(); // get prop
-                int drawableToAddTexture = Props.Where(p => p.propId == enumNumber).First().propList.IndexOf(prop); //get index of our clicked prop in collection
+                }
 
                 string txtLetter = XMLHandler.Number2String(txtCount, false);
                 prop.propTextureList.Add(new PropTexture(txtLetter, "0", "0", txtCount, 0, 0, 255));
-
                 prop.propTextureCount++;
-                SetLogMessage("Added new texture (letter " + txtLetter + ") to prop " + String.Format("{0:D3}", drawableToAddTexture) + " in " + propName + " prop | Count: " + prop.propTextureCount + " / 26");
-                
+
+                SetLogMessage("Added new texture (letter " + txtLetter + ") to prop " + String.Format("{0:D3}", prop.propIndex) + " in " + propName + " prop | Count: " + prop.propTextureCount + " / 26");
             }
             else //else add new drawable number
             {
 
                 string propName = btn; //drawable we are adding txt (p_head, p_eyes etc)
                 int _index = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), propName.ToLower()); //0 = p_head, 1 = p_eyes etc -> YMTTypes.cs (it is also anchorId of prop)
-                
-                int drawIndex = Props.Where(p => p.propId == _index).First().propList.Count(); //prop drawable index (000, 001, 002 etc)
+
+                PropData prop = Props.Where(p => p.propType == propName.ToLower()).First(); //get prop
+                int drawIndex = prop.propList.Count;
 
                 string[] expressionMods = new string[] { "0", "0", "0", "0", "0" };
 
                 //some props have renderFlag = "PRF_ALPHA", others nothing - since i don't know what it does, leave it as nothing - update: now it is editable and user can easily change it
-                PropDrawable _newPropDrawable = new PropDrawable(drawIndex, "none", expressionMods, new ObservableCollection<PropTexture>(), "", 0, 0, _index, drawIndex, 0);
+                PropDrawable _newPropDrawable = new PropDrawable(drawIndex, 1, "none", expressionMods, new ObservableCollection<PropTexture>(), "", 0, 0, prop.propAnchorId, drawIndex, 0);
                 _newPropDrawable.propTextureList.Add(new PropTexture("a", "0", "0", 0, 0, 0, 255));
 
-                Props.Where(p => p.propId == _index).First().propList.Add(_newPropDrawable);
+                prop.propList.Add(_newPropDrawable);
 
                 SetLogMessage("Added new prop (number " + String.Format("{0:D3}", drawIndex) + ") to " + btn + " prop");
             }
@@ -413,15 +408,13 @@ namespace YMTEditor
             string[] btn_parts = btn.Split((char)32);
             if (btn_parts.Length > 1) // if more than 1 then remove last texture
             {
-                
                 int drawableIndex = Convert.ToInt32(btn_parts[0]);
                 int lastTxtIndex = Convert.ToInt32(btn_parts[1]);
                 string drawableName = Convert.ToString((sender as Button).Tag);
 
-                int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), drawableName.ToLower());
-                int _index = Convert.ToInt32(Components.Where(z => z.compId == enumNumber).First().compIndex); //component index in our ymt
+                ComponentData compdata = Components.Where(z => z.compType == drawableName.ToLower()).First(); //component data
 
-                ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == drawableIndex).First(); //get component
+                ComponentDrawable comp = compdata.compList.Where(c => c.drawableIndex == drawableIndex).First(); //get component
                 int txtCount = comp.drawableTextureCount;
 
                 if (txtCount <= 1)
@@ -441,20 +434,20 @@ namespace YMTEditor
                 int clickedIndex = Convert.ToInt32(btn_parts[0]);
 
                 string drawableName = Convert.ToString((sender as Button).Tag);
-                int _index = Convert.ToInt32(Components.Where(z => z.compType == drawableName.ToLower()).First().compIndex);
+                ComponentData compdata = Components.Where(z => z.compType == drawableName.ToLower()).First();
 
-                ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == clickedIndex).First();
-                int drawableToRemoveIndex = Components.ElementAt(_index).compList.IndexOf(comp);
+                ComponentDrawable comp = compdata.compList.Where(c => c.drawableIndex == clickedIndex).First();
+                int drawableToRemoveIndex = compdata.compList.IndexOf(comp);
 
-                if (Components.ElementAt(_index).compList.Count() > 1)
+                if (compdata.compList.Count() > 1)
                 {
                     if (_removeAsk.IsChecked)
                     {
                         MessageBoxResult result = MessageBox.Show(this, "Do you want to remove drawable " + String.Format("{0:D3}", drawableToRemoveIndex) + "?\nIt can't be restored.\n\nThis box can be disabled in options.", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                         if (result == MessageBoxResult.OK)
                         {
-                            Components.ElementAt(_index).compList.RemoveAt(drawableToRemoveIndex);
-                            UpdateDrawableComponentIndexes(Components.ElementAt(_index));
+                            compdata.compList.RemoveAt(drawableToRemoveIndex);
+                            UpdateDrawableComponentIndexes(compdata);
                             SetLogMessage("Removed drawable (number " + String.Format("{0:D3}", drawableToRemoveIndex) + ") from " + drawableName + " component | CHANGED ALL OTHER INDEX NUMBERS (!)");
                         }
                         else
@@ -464,8 +457,8 @@ namespace YMTEditor
                     }
                     else
                     {
-                        Components.ElementAt(_index).compList.RemoveAt(drawableToRemoveIndex);
-                        UpdateDrawableComponentIndexes(Components.ElementAt(_index));
+                        compdata.compList.RemoveAt(drawableToRemoveIndex);
+                        UpdateDrawableComponentIndexes(compdata);
                         SetLogMessage("Removed drawable (number " + String.Format("{0:D3}", drawableToRemoveIndex) + ") from " + drawableName + " component | CHANGED ALL OTHER INDEX NUMBERS (!)");
                     }
                 }
@@ -484,14 +477,11 @@ namespace YMTEditor
             string[] btn_parts = btn.Split((char)32);
             if (btn_parts.Length > 1) // if more than 1 then remove last texture
             {
-
                 int drawableIndex = Convert.ToInt32(btn_parts[0]); //000, 001, 002 etc
                 int lastTxtIndex = Convert.ToInt32(btn_parts[1]); //last txt
                 string drawableName = Convert.ToString((sender as Button).Tag); //prop name (p_head, p_eyes, etc)
 
-                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), drawableName.ToLower()); //0 = p_head, 1 = p_eyes etc -> YMTTypes.cs (it is also anchorId of prop)
-
-                PropDrawable prop = Props.Where(p => p.propId == enumNumber).First().propList.Where(p => p.propIndex == drawableIndex).First(); //get prop
+                PropDrawable prop = Props.Where(p => p.propType == drawableName.ToLower()).First().propList.Where(p => p.propIndex == drawableIndex).First(); //get prop
                 int txtCount = prop.propTextureCount;
 
                 if (txtCount <= 1)
@@ -504,16 +494,13 @@ namespace YMTEditor
                 prop.propTextureList.RemoveAt(txtCount - 1); //remove last texture
                 prop.propTextureCount--;
                 SetLogMessage("Removed texture from prop drawable " + String.Format("{0:D3}", drawableIndex) + " in " + drawableName + " prop | Count: " + prop.propTextureCount + " / 26");
-                
             }
             else //else remove drawable
             {
                 int clickedIndex = Convert.ToInt32(btn_parts[0]);
-
                 string drawableName = Convert.ToString((sender as Button).Tag);
-                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), drawableName.ToLower()); //0 = p_head, 1 = p_eyes etc -> YMTTypes.cs (it is also anchorId of prop)
 
-                PropData propData = Props.Where(p => p.propId == enumNumber).First();
+                PropData propData = Props.Where(p => p.propType == drawableName.ToLower()).First();
                 PropDrawable prop = propData.propList.Where(p => p.propIndex == clickedIndex).First();
                 int drawableToRemoveIndex = propData.propList.IndexOf(prop); 
 
@@ -558,12 +545,8 @@ namespace YMTEditor
             if (isChecked) // if true it changed from false to true, so add new component
             {
                 //add first drawable(000), default compInfo, and one texture
-                ComponentData newComponent = new ComponentData(clicked_name, enumNumber, 0, new ObservableCollection<ComponentDrawable>()) { compHeader = clicked_name.ToUpper() };
-                ComponentInfo defaultInfo = new ComponentInfo("none", "none", new string[] { "0", "0", "0", "0", "0" }, 0, "0", "0", "PV_COMP_HEAD", 0, enumNumber, 0); // default compInfo values
-                ComponentDrawable _newDrawable = new ComponentDrawable(000, 1, 1, 0, false, new ObservableCollection<ComponentTexture>(), new ObservableCollection<ComponentInfo>());
-                _newDrawable.drawableTextures.Add(new ComponentTexture("a", "0"));
-                _newDrawable.drawableInfo.Add(defaultInfo);
-
+                ComponentData newComponent = new ComponentData(clicked_name, enumNumber, 0, new ObservableCollection<ComponentDrawable>());
+                ComponentDrawable _newDrawable = new ComponentDrawable(newComponent.compId, newComponent.compList.Count);
                 newComponent.compList.Add(_newDrawable);
 
                 //insert at 0, it will be sorted below
@@ -574,7 +557,6 @@ namespace YMTEditor
             }
             else // it changed from true to false, so delete clicked component
             {
-
                 //don't check options, always ask to remove because it can be missclicked if someone forgots he have option disabled
                 MessageBoxResult result = MessageBox.Show(this, "Do you want to remove WHOLE component " + clicked_name.ToUpper() + "?\n\nIt will REMOVE ALL DRAWABLES and it can't be restored.\n", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.OK)
@@ -607,7 +589,7 @@ namespace YMTEditor
         private static ObservableCollection<PropData> SortProps(ObservableCollection<PropData> SortProps)
         {
             ObservableCollection<PropData> temp;
-            temp = new ObservableCollection<PropData>(SortProps.OrderBy(p => p.propId));
+            temp = new ObservableCollection<PropData>(SortProps.OrderBy(p => p.propAnchorId));
             SortProps.Clear();
             foreach (var j in temp) SortProps.Add(j);
             return SortProps;
@@ -621,12 +603,9 @@ namespace YMTEditor
 
             if (isChecked) // if true it changed from false to true, so add new component
             {
-
-                string[] expressionMods = new string[] { "0", "0", "0", "0", "0" };
-
                 //add first drawable(000), default compInfo, and one texture
-                PropData newProp = new PropData(clicked_name, enumNumber, new ObservableCollection<PropDrawable>()) { propHeader = clicked_name.ToUpper() };
-                PropDrawable newPropDrawable = new PropDrawable(0, "none", expressionMods, new ObservableCollection<PropTexture>(), "", 0, 0, enumNumber, 0, 0);
+                PropData newProp = new PropData(clicked_name, enumNumber, new ObservableCollection<PropDrawable>());
+                PropDrawable newPropDrawable = new PropDrawable(0, 1, "none", new string[] { "0", "0", "0", "0", "0" }, new ObservableCollection<PropTexture>(), "", 0, 0, enumNumber, 0, 0);
                 newPropDrawable.propTextureList.Add(new PropTexture("a", "0", "0", 0, 0, 0, 255));
                 newProp.propList.Add(newPropDrawable);
 
@@ -637,12 +616,11 @@ namespace YMTEditor
             }
             else // it changed from true to false, so delete clicked component
             {
-
                 //don't check options, always ask to remove because it can be missclicked if someone forgots he have option disabled
                 MessageBoxResult result = MessageBox.Show(this, "Do you want to remove WHOLE prop " + clicked_name.ToUpper() + "?\n\nIt will REMOVE ALL DRAWABLES and it can't be restored.\n", "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.OK)
                 {
-                    PropData propData = Props.Where(p => p.propId == enumNumber).First();
+                    PropData propData = Props.Where(p => p.propAnchorId == enumNumber).First();
                     int removeIndex = Props.IndexOf(propData);
 
                     Props.RemoveAt(removeIndex);
@@ -685,7 +663,14 @@ namespace YMTEditor
 
         public void SetLogMessage(string message)
         {
-            _logBar.Text = "Logs: " + message;
+            if (_enableLogs.IsChecked)
+            {
+                _logBar.Text = "Logs: " + message;
+            }
+            else
+            {
+                _logBar.Text = "";
+            }
         }
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
@@ -712,17 +697,17 @@ namespace YMTEditor
 
         private void propMask_Changed(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+            if (isSetFromTxtDropdown) return;
+
             int _newPropMask = (int) e.NewValue;
 
             string compName = Convert.ToString((sender as FrameworkElement).Parent.GetValue(TagProperty)).ToLower();
             int drawIndex = (int) (sender as FrameworkElement).Tag;
 
-            int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), compName);
-            int _index = Convert.ToInt32(Components.Where(z => z.compId == enumNumber).First().compIndex);
-
-            ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == drawIndex).First(); //get component
+            ComponentData compData = Components.Where(z => z.compType == compName).First();
+            ComponentDrawable comp = compData.compList.Where(c => c.drawableIndex == drawIndex).First(); //get component
             comp.drawablePropMask = _newPropMask;
-            string _newTexId = _newPropMask == 17 || _newPropMask == 19 || _newPropMask == 21 || _newPropMask == 25 || _newPropMask == 27 || _newPropMask == 49 ? "1" : "0";
+            int _newTexId = _newPropMask == 17 || _newPropMask == 19 || _newPropMask == 21 || _newPropMask == 25 || _newPropMask == 27 || _newPropMask == 49 ? 1 : 0;
 
             foreach (var txt in comp.drawableTextures)
             {
@@ -752,6 +737,15 @@ namespace YMTEditor
             bool? value = (sender as MenuItem).IsChecked;
 
             Properties.Settings.Default.removeAsk = (bool) value;
+            Properties.Settings.Default.Save();
+            SetLogMessage("Saved options, will be restored when opening the program");
+        }
+
+        private void EnableLogs_Click(object sender, RoutedEventArgs e)
+        {
+            bool? value = (sender as MenuItem).IsChecked;
+
+            Properties.Settings.Default.enableLogs = (bool)value;
             Properties.Settings.Default.Save();
             SetLogMessage("Saved options, will be restored when opening the program");
         }
@@ -892,29 +886,28 @@ namespace YMTEditor
                     "You can find me here: \n\n" +
                     "Github - grzybeek \n" +
                     "Discord acc - grzybeek#9100 \n" +
-                    "Discord server - discord.gg/txjjzdr \n" +
+                    "Discord server - discord.gg/xUXbrupFhN \n" +
                     "forum.cfx.re acc - grzybeek\n";
 
                 MessageBox.Show(text, "Contact info", MessageBoxButton.OK, MessageBoxImage.Question);
             }
         }
 
+        bool isSetFromTxtDropdown = false;
         private void TXTCombo_DropDownClosed(object sender, EventArgs e)
         {
             ComboBox cmb = (ComboBox)sender;
             if(cmb.SelectedItem != null)
             {
+                isSetFromTxtDropdown = true;
                 string btn = Convert.ToString(cmb.DataContext);
                 string[] btn_parts = btn.Split((char)32);
                 int index = Convert.ToInt32(btn_parts[0]); //index 000, 001, 002 etc
+                int val = cmb.SelectedIndex;
 
                 string compName = (string)(sender as FrameworkElement).Tag; //name jbib, lowr, hand etc
-                int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), compName.ToLower());
-                int _index = Convert.ToInt32(Components.Where(z => z.compId == enumNumber).First().compIndex);
-
-                string val = (string) cmb.SelectedValue.ToString().Substring(0,1); //selected option from combobox, only number
-
-                ComponentDrawable comp = Components.ElementAt(_index).compList.Where(c => c.drawableIndex == index).First(); //get component
+                ComponentData compData = Components.Where(z => z.compType == compName.ToLower()).First();
+                ComponentDrawable comp = compData.compList.Where(c => c.drawableIndex == index).First(); //get component
 
                 foreach (var txt in comp.drawableTextures)
                 {
@@ -929,6 +922,7 @@ namespace YMTEditor
                 {
                     comp.drawablePropMask = 1; //_u _uni propmask
                 }
+                isSetFromTxtDropdown = false;
             }
         }
 
@@ -942,9 +936,7 @@ namespace YMTEditor
                 string[] btn_parts = btn.Split((char)32);
                 int index = Convert.ToInt32(btn_parts[0]); //index 000, 001, 002 etc
 
-                int enumNumber = (int)(YMTTypes.PropNumbers)Enum.Parse(typeof(YMTTypes.PropNumbers), propName.ToLower());
-
-                PropData propData = Props.Where(p => p.propId == enumNumber).First();
+                PropData propData = Props.Where(p => p.propType == propName.ToLower()).First();
                 PropDrawable prop = propData.propList.Where(p => p.propIndex == index).First(); //get our prop
                 
                 string val = (string)cmb.SelectedValue.ToString(); //selected option from combobox
@@ -963,8 +955,7 @@ namespace YMTEditor
                 int index = Convert.ToInt32(btn_parts[0]); //index 000, 001, 002 etc
 
                 string compName = (string)(sender as FrameworkElement).Tag; //name jbib, lowr, hand etc
-                int enumNumber = (int)(YMTTypes.ComponentNumbers)Enum.Parse(typeof(YMTTypes.ComponentNumbers), compName.ToLower());
-                int _index = Convert.ToInt32(Components.Where(z => z.compId == enumNumber).First().compIndex);
+                int _index = Convert.ToInt32(Components.Where(z => z.compType == compName.ToLower()).First().compIndex);
 
                 bool val = Convert.ToBoolean(cmb.SelectedValue.ToString()); //selected option from combobox
 
@@ -1025,7 +1016,7 @@ namespace YMTEditor
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fvi.FileVersion.ToString();
-            _version.Header = "Current version: " + version;
+            _version.Header = "Version: " + version;
 
             if (CheckInternetConnection())
             {
@@ -1037,27 +1028,40 @@ namespace YMTEditor
 
                 if (version != githubVersion)
                 {
-                    MessageBoxResult result = MessageBox.Show(this, "There is new version of YMTEditor available!\nYour version: " + version + "\nAvailable version: " + githubVersion + " \n\nDo you want to download it now?\n\nClick YES to open website and close editor\nClick NO to open editor", "New version available!", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        //probably better would be auto-updater but idk how to do it yet
-                        Process.Start("https://github.com/grzybeek/YMTEditor/releases");
-                        Environment.Exit(0);
-                    }
-                    else if (result == MessageBoxResult.No)
-                    {
-                        //open editor
-                    }
-                }
-                else
-                {
-                    //good version, open editor
+                    _version.Header += " (Update available)";
+                    _version.IsEnabled = true;
                 }
             }
             else
             {
                 //no internet, open editor
             }
+        }
+
+        private void NewVersion_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/grzybeek/YMTEditor/releases");
+        }
+
+        private void Button_Click_AddMultipleDrawables(object sender, RoutedEventArgs e)
+        {
+            AddMultipleDrawables window;
+            string btn = Convert.ToString((sender as Button).DataContext);
+
+            if(btn.Substring(0,1) == "P")
+            {
+                PropData curProp = Props.Where(p => p.propType == btn.ToLower()).First();
+
+                window = new AddMultipleDrawables(curProp);
+            } 
+            else
+            {
+                ComponentData curComp = Components.Where(z => z.compType == btn.ToLower()).First();
+
+                window = new AddMultipleDrawables(curComp);
+            }
+
+            window.ShowDialog();
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace YMTEditor
+﻿namespace YMTEditor
 {
     public class YMTTypes
     {
@@ -36,6 +34,5 @@ namespace YMTEditor
             p_ph_l_hand = 11, //unused? - not sure about this name
             p_ph_r_hand = 12 //unused? - not sure about this name
         }
-
     }
 }

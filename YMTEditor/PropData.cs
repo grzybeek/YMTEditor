@@ -1,27 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace YMTEditor
 {
-    public class PropData
+    public class PropData : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public string propType;
-        public int propId;
-        public ObservableCollection<PropDrawable> propList { get; set; }
+        public int propAnchorId;
+        private ObservableCollection<PropDrawable> _propList;
+        public ObservableCollection<PropDrawable> propList
+        {
+            get { return _propList; }
+            set
+            {
+                _propList = value;
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("propList"));
+            }
+        }
 
         public string propHeader { get; set; }
 
         public PropData(string type, int id, ObservableCollection<PropDrawable> props)
         {
             propType = type;
-            propId = id;
+            propAnchorId = id;
             propList = props;
-
+            propHeader = type.ToUpper();
         }
-
     }
 }
