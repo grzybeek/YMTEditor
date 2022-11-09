@@ -1030,6 +1030,7 @@ namespace YMTEditor
                 {
                     _version.Header += " (Update available)";
                     _version.IsEnabled = true;
+                    _version.Click += NewVersion_Click;
                 }
             }
             else

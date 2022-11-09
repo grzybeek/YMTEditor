@@ -59,6 +59,9 @@
     <Reference Include="CodeWalker.Core">
       <HintPath>..\packages\CodeWalker.Core.dll</HintPath>
     </Reference>
+    <Reference Include="SharpDX.Mathematics">
+      <HintPath>..\packages\SharpDX.Mathematics.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
