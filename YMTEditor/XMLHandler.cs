@@ -118,7 +118,7 @@ namespace YMTEditor
                 {
                     //some ymt's have more <Item>'s in component section than defined in <availComp>, for example freemode male_heist or bikerdlc
                     //so just skip more than in availComp
-                    return;
+                    break;
                 }
                 ComponentData _curComp = MainWindow.Components.ElementAt(compItemIndex); //current component (jbib/lowr/teef etc)
                 int _curCompDrawablesCount = 0; //count how many component has variations (000, 001, 002, etc)
